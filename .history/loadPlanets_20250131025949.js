@@ -3,6 +3,8 @@ import { DRACOLoader } from "https://cdn.skypack.dev/three@0.129.0/examples/jsm/
 import * as THREE from "https://cdn.skypack.dev/three@0.129.0/build/three.module.js";
 import gsap from "https://cdn.skypack.dev/gsap";  
 import { showPlanetInfo, hidePlanetInfo } from './planetInfo.js';
+import { KTX2Loader } from "https://cdn.skypack.dev/three@0.129.0/examples/jsm/loaders/KTX2Loader.js";
+
 
 // 🌎 Rotation Speeds
 const baseRotationSpeed = 0.002;
@@ -60,7 +62,7 @@ export function loadPlanets(scene) {
     sceneRef = scene;
 
     loadPlanetModel(scene, "earth", './3d_models_compressed/earth_draco.glb', [0, 0, 0], 10000);
-    loadPlanetModel(scene, "sun", './3d_models_compressed/sun.glb', [-5000000, 0, 0], 20000);
+    loadPlanetModel(scene, "sun", './3d_models_compressed/sun_draco.glb', [-5000000, 0, 0], 20000);
     loadPlanetModel(scene, "mercury", './3d_models_compressed/mercury_draco.glb', [-1000000, 0, 0], 4879);
     loadPlanetModel(scene, "venus", './3d_models_compressed/venus_draco.glb', [-3000000, 0, 0], 8000);
     loadPlanetModel(scene, "mars", './3d_models_compressed/mars_draco.glb', [2279000, 0, 0], 5200);

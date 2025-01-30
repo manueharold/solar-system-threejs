@@ -3,6 +3,7 @@ import { DRACOLoader } from "https://cdn.skypack.dev/three@0.129.0/examples/jsm/
 import * as THREE from "https://cdn.skypack.dev/three@0.129.0/build/three.module.js";
 import gsap from "https://cdn.skypack.dev/gsap";  
 import { showPlanetInfo, hidePlanetInfo } from './planetInfo.js';
+import { Quaternion, Vector3 } from "https://cdn.skypack.dev/three@0.129.0/build/three.module.js";
 
 // 🌎 Rotation Speeds
 const baseRotationSpeed = 0.002;
@@ -20,8 +21,7 @@ const rotationSpeeds = {
 // ✅ Initialize Loader
 const loader = new GLTFLoader();
 const dracoLoader = new DRACOLoader();
-dracoLoader.setDecoderPath('https://cdn.jsdelivr.net/npm/three@0.157.0/examples/jsm/libs/draco/');
-dracoLoader.preload();
+dracoLoader.setDecoderPath('https://www.gstatic.com/draco/v1/decoders/');
 loader.setDRACOLoader(dracoLoader);
 
 // Store planets
@@ -31,36 +31,28 @@ let moonOrbitPaused = false;
 
 // ✅ Load Planet Model
 function loadPlanetModel(scene, name, modelPath, position, size) {
-    loader.load(
-        modelPath,
-        (gltf) => {
-            const planet = gltf.scene;
-            planet.name = name.toLowerCase();
-            planet.position.set(...position);
+    loader.load(modelPath, (gltf) => {
+        const planet = gltf.scene;
+        planet.name = name.toLowerCase();
+        planet.position.set(...position);
 
-            const box = new THREE.Box3().setFromObject(planet);
-            const scaleFactor = size / box.getSize(new THREE.Vector3()).length();
-            planet.scale.set(scaleFactor, scaleFactor, scaleFactor);
+        // Scale planet
+        const box = new THREE.Box3().setFromObject(planet);
+        const scaleFactor = size / box.getSize(new THREE.Vector3()).length();
+        planet.scale.set(scaleFactor, scaleFactor, scaleFactor);
 
-            scene.add(planet);
-            planets[name.toLowerCase()] = planet; // Store planet reference
-
-            console.log(`✅ Loaded: ${planet.name}`);
-        },
-        undefined,
-        (error) => {
-            console.error(`❌ Failed to load ${name}:`, error);
-        }
-    );
+        scene.add(planet);
+        planets[planet.name] = planet;
+        console.log(`✅ Loaded: ${planet.name}`);
+    });
 }
-
 
 // ✅ Load Planets into Scene
 export function loadPlanets(scene) {
     sceneRef = scene;
 
     loadPlanetModel(scene, "earth", './3d_models_compressed/earth_draco.glb', [0, 0, 0], 10000);
-    loadPlanetModel(scene, "sun", './3d_models_compressed/sun.glb', [-5000000, 0, 0], 20000);
+    loadPlanetModel(scene, "sun", './3d_models_compressed/sun_draco.glb', [-5000000, 0, 0], 20000);
     loadPlanetModel(scene, "mercury", './3d_models_compressed/mercury_draco.glb', [-1000000, 0, 0], 4879);
     loadPlanetModel(scene, "venus", './3d_models_compressed/venus_draco.glb', [-3000000, 0, 0], 8000);
     loadPlanetModel(scene, "mars", './3d_models_compressed/mars_draco.glb', [2279000, 0, 0], 5200);
@@ -100,12 +92,6 @@ function animateScene() {
 // ✅ Move Camera to a Planet
 export function moveToPlanet(planetName, camera, controls, scene) {
     let targetPlanet = scene.getObjectByName(planetName);
-
-    if (planetName === "moon") {
-        moonOrbitPaused = true;
-    } else {
-        moonOrbitPaused = false;
-    }
 
     if (!targetPlanet) {
         console.error(`❌ Planet "${planetName}" not found!`);
