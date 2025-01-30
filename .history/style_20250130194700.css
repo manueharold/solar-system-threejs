@@ -1,0 +1,38 @@
+/* 🌍 Improve the Info Panel UI */
+.planet-info {
+    position: absolute;
+    bottom: 40px;  /* Move it up a bit */
+    left: 40px;  /* Give more space from the edge */
+    padding: 20px;  /* Add more padding */
+    background: rgba(0, 0, 0, 0.85); /* Slightly darker */
+    color: white;
+    border-radius: 12px;
+    width: 280px; /* Slightly wider */
+    font-family: Arial, sans-serif;
+    box-shadow: 0px 6px 12px rgba(0, 0, 0, 0.4);
+    opacity: 0;
+    transform: translateY(20px);
+    transition: opacity 0.3s ease-in-out, transform 0.3s ease-in-out;
+}
+
+.planet-image {
+    display: none; /* Hide the image */
+}
+
+/* ❌ Close Button */
+.close-btn {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    background: transparent;
+    border: none;
+    color: white;
+    font-size: 18px;
+    cursor: pointer;
+}
+
+/* 🌟 Make it visible when active */
+.planet-info.active {
+    opacity: 1;
+    transform: translateY(0);
+}

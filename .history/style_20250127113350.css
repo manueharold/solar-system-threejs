@@ -1,0 +1,48 @@
+body, html {
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+}
+
+#container {
+    width: 100vw;
+    height: 100vh;
+    background: 
+        radial-gradient(circle, rgba(0, 0, 50, 1) 0%, rgba(10, 10, 80, 1) 60%, rgba(30, 30, 90, 1) 100%), 
+        url('https://images.unsplash.com/photo-1516918733126-3f3c3d4ce3ad') no-repeat center center fixed;
+    background-size: cover;
+    position: relative;
+}
+
+/* Adding cosmic glow effect */
+#container::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: radial-gradient(circle, rgba(0, 0, 60, 0.7) 10%, rgba(0, 50, 100, 0.5) 50%, rgba(0, 100, 150, 0.2) 100%);
+    z-index: 1;
+    pointer-events: none;
+    mix-blend-mode: screen;
+}
+
+/* Optional: Adding a subtle starry background */
+#container .stars {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: url('https://cdn.pixabay.com/photo/2015/09/18/19/05/space-944586_960_720.jpg') repeat;
+    z-index: 2;
+    opacity: 0.1;
+    pointer-events: none;
+    animation: moveStars 30s linear infinite;
+}
+
+@keyframes moveStars {
+    from { background-position: 0 0; }
+    to { background-position: 1000px 1000px; }
+}

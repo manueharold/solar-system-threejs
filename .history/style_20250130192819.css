@@ -1,0 +1,38 @@
+/* 🪐 Fancy Planet Info Panel */
+.planet-info {
+    position: absolute;
+    top: 50%;
+    left: -400px;  /* Hidden off-screen initially */
+    transform: translateY(-50%);
+    width: 320px;
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(15px);
+    padding: 20px;
+    border-radius: 15px;
+    transition: left 0.4s ease-in-out;
+    color: white;
+    font-family: Arial, sans-serif;
+}
+
+/* Show panel */
+.planet-info.active {
+    left: 20px;
+}
+
+/* 🖼️ Planet Image */
+.planet-image {
+    width: 100%;
+    border-radius: 10px;
+}
+
+/* ❌ Close Button */
+.close-btn {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: none;
+    border: none;
+    color: white;
+    font-size: 20px;
+    cursor: pointer;
+}

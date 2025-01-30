@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Solar System</title>
+    <style>
+        body { margin: 0; overflow: hidden; }
+        #searchContainer {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            z-index: 100;
+        }
+        input { padding: 5px; }
+    </style>
+</head>
+<body>
+
+<div id="searchContainer">
+    <label>Search Planet</label>
+    <input type="text" id="searchInput" placeholder="Type planet name">
+</div>
+
+<!-- Load Three.js and GSAP -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script> <!-- ✅ GSAP included -->
+
+<!-- Load main JavaScript files -->
+<script type="module" src="main.js"></script>
+
+</body>
+</html>

@@ -1,0 +1,13 @@
+input {
+    margin: 10px;
+    padding: 5px;
+}
+button {
+    padding: 10px;
+    cursor: pointer;
+}
+
+/* styles.css */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;

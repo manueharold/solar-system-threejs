@@ -1,0 +1,22 @@
+/* 🌍 Improve the Info Panel UI */
+.planet-info {
+    position: absolute;
+    bottom: 20px;
+    left: 20px;
+    padding: 15px;
+    background: rgba(0, 0, 0, 0.8);
+    color: white;
+    border-radius: 10px;
+    width: 250px;
+    font-family: Arial, sans-serif;
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.3);
+    opacity: 0; /* Initially hidden */
+    transform: translateY(20px); /* Slightly move down */
+    transition: opacity 0.3s ease-in-out, transform 0.3s ease-in-out;
+}
+
+/* 🪄 Make it visible when active */
+.planet-info.active {
+    opacity: 1;
+    transform: translateY(0);
+}

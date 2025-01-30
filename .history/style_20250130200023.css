@@ -1,0 +1,100 @@
+/* 🌍 Improved Search Bar */
+.search-bar {
+    width: 100%;
+    padding: 14px;
+    border-radius: 15px;
+    border: none;
+    background: rgba(255, 255, 255, 0.15);
+    backdrop-filter: blur(10px);
+    color: white;
+    font-size: 18px;
+    outline: none;
+    transition: all 0.3s ease-in-out;
+    box-shadow: 0 0 8px rgba(255, 255, 255, 0.2);
+}
+
+.search-bar:focus {
+    background: rgba(255, 255, 255, 0.25);
+    box-shadow: 0 0 12px rgba(255, 255, 255, 0.4);
+}
+
+/* 🔍 Styled Search Suggestions */
+.search-suggestions {
+    position: absolute;
+    width: 100%;
+    background: rgba(0, 0, 0, 0.85);
+    border-radius: 10px;
+    padding: 8px 0;
+    margin-top: 5px;
+    list-style: none;
+    color: white;
+    font-size: 16px;
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.4);
+    display: none;
+}
+
+.search-suggestions li {
+    padding: 10px 15px;
+    cursor: pointer;
+    transition: background 0.2s ease-in-out;
+}
+
+.search-suggestions li:hover {
+    background: rgba(255, 255, 255, 0.2);
+}
+
+/* 🪐 Modern Planet Info Panel */
+.planet-info {
+    position: absolute;
+    top: 50%;
+    right: -400px;  /* Start hidden off-screen */
+    transform: translateY(-50%);
+    width: 340px;
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(12px);
+    padding: 24px;
+    border-radius: 18px;
+    transition: transform 0.4s ease-in-out, opacity 0.3s ease-in-out; /* Use transform for smooth animation */
+    color: white;
+    font-family: Arial, sans-serif;
+    box-shadow: 0px 10px 20px rgba(0, 0, 0, 0.4);
+    opacity: 0;
+}
+
+/* Show panel with smooth animation */
+.planet-info.active {
+    transform: translateY(-50%) translateX(-420px); /* Move it into view */
+    opacity: 1;
+}
+
+.planet-image {
+    display: none;
+}
+
+/* 📄 Title Formatting */
+.planet-info h2 {
+    text-transform: capitalize; /* Make first letter uppercase */
+    margin-bottom: 8px; /* Space between title and description */
+}
+
+/* 📜 Add Space Below Description */
+.planet-info p {
+    margin-bottom: 12px;
+}
+
+/* ❌ Close Button */
+.close-btn {
+    position: absolute;
+    top: 14px;
+    right: 14px;
+    background: none;
+    border: none;
+    color: white;
+    font-size: 22px;
+    cursor: pointer;
+    transition: color 0.2s ease-in-out;
+}
+
+.close-btn:hover {
+    color: #ff4d4d;
+}

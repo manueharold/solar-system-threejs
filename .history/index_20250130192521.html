@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Solar System</title>
+    <script src="https://cdn.tailwindcss.com"></script> <!-- ✅ Tailwind for styling -->
+    <style>
+        body { margin: 0; overflow: hidden; font-family: Arial, sans-serif; }
+        .search-container {
+            position: absolute;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 100;
+            width: 300px;
+        }
+        .search-bar {
+            width: 100%;
+            padding: 10px;
+            border-radius: 10px;
+            border: 2px solid #555;
+            background: rgba(20, 20, 20, 0.8);
+            color: white;
+            outline: none;
+        }
+        .search-bar::placeholder {
+            color: #bbb;
+        }
+        .search-suggestions {
+            position: absolute;
+            width: 100%;
+            background: rgba(30, 30, 30, 0.9);
+            border-radius: 10px;
+            overflow: hidden;
+            display: none;
+        }
+        .search-suggestions li {
+            padding: 10px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        .search-suggestions li:hover {
+            background: #3b82f6;
+        }
+    </style>
+</head>
+<body>
+
+<!-- 🔍 Search Bar -->
+<div class="search-container">
+    <input type="text" id="searchInput" class="search-bar" placeholder="Search a planet...">
+    <ul id="searchSuggestions" class="search-suggestions"></ul>
+</div>
+
+<!-- 🌎 Planet Info Popup -->
+<div id="planetInfo" style="position: absolute; top: 20px; right: 20px; padding: 15px; background: rgba(0, 0, 0, 0.8); color: white; border-radius: 8px; display: none; z-index: 100;">
+    <h2 id="planetName"></h2>
+    <p><strong>Diameter:</strong> <span id="planetDiameter"></span> km</p>
+    <p><strong>Distance from Sun:</strong> <span id="planetDistance"></span> km</p>
+    <p id="planetFact"></p>
+    <button id="closePopup">Close</button>
+</div>
+
+<!-- 🌌 Load Three.js & GSAP -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+
+<!-- 🚀 Main JavaScript -->
+<script type="module" src="main.js"></script>
+
+</body>
+</html>

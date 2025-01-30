@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Solar System</title>
+    <style>
+        body { margin: 0; overflow: hidden; }
+        #searchContainer {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            z-index: 100;
+        }
+        input { padding: 5px; }
+    </style>
+</head>
+<body>
+
+<div id="searchContainer">
+    <label>Search Planet</label>
+    <input type="text" id="searchInput" placeholder="Type planet name">
+</div>
+
+<!-- Load Three.js and Tween.js -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/tween.js/18.6.4/tween.umd.js"></script>
+
+<!-- Load main JavaScript files as ES6 modules -->
+<script type="module" src="main.js"></script>
+<script type="module" src="loadPlanets.js"></script>
+
+</body>
+</html>

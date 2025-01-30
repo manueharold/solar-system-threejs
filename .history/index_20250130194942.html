@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Solar System</title>
+    <link rel="stylesheet" href="style.css"> <!-- ✅ Make sure this is correctly linked -->
+    <script src="https://cdn.tailwindcss.com"></script> 
+    </head> <!-- ✅ Tailwind for styling -->
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+            font-family: Arial, sans-serif;
+        }
+
+        /* 🌌 Glassmorphism Search Bar */
+        .search-container {
+            position: absolute;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 100;
+            width: 320px;
+        }
+
+        .search-bar {
+            width: 100%;
+            padding: 12px;
+            border-radius: 15px;
+            border: none;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            color: white;
+            outline: none;
+            font-size: 16px;
+            transition: all 0.3s ease-in-out;
+        }
+
+        .search-bar:focus {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        /* 🪐 Fancy Planet Info Panel */
+        .planet-info {
+            position: absolute;
+            top: 50%;
+            left: -400px;  /* Hidden off-screen initially */
+            transform: translateY(-50%);
+            width: 320px;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(15px);
+            padding: 20px;
+            border-radius: 15px;
+            transition: left 0.4s ease-in-out;
+            color: white;
+            font-family: Arial, sans-serif;
+        }
+
+        /* Show panel */
+        .planet-info.active {
+            left: 20px;
+        }
+
+        /* ❌ Close Button */
+        .close-btn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: none;
+            border: none;
+            color: white;
+            font-size: 20px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- 🔍 Search Bar -->
+    <div class="search-container">
+        <input type="text" id="searchInput" class="search-bar" placeholder="Search a planet...">
+        <ul id="searchSuggestions" class="search-suggestions"></ul>
+    </div>
+
+    <!-- 🪐 Planet Info Panel -->
+    <div id="planetInfoPanel" class="planet-info">
+        <button id="closeInfoPanel" class="close-btn">✖</button>
+        <img id="planetImage" class="planet-image" src="" alt="Planet Image">
+        <h2 id="planetName"></h2>
+        <p id="planetDescription"></p>
+    </div>
+
+    <!-- 🌌 Load Three.js & GSAP -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+
+    <!-- 🚀 Load JavaScript Modules -->
+    <script type="module" src="main.js"></script>
+    <script type="module" src="searchHandler.js"></script>
+    <script type="module" src="planetInfo.js"></script>
+
+</body>
+</html>

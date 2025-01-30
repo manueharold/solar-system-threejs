@@ -1,0 +1,14 @@
+{
+  "name": "Website",
+  "version": "1.0.0",
+  "scripts": {
+  "build:css": "postcss src/styles.css -o dist/styles.css",
+    "dev": "npm run build:css && your-development-server-command"
+  },
+  "devDependencies": {
+    "autoprefixer": "^10.4.20",
+    "postcss": "^8.5.1",
+    "postcss-cli": "^11.0.0",
+    "tailwindcss": "^4.0.1"
+  }
+}
