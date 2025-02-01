@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Solar System</title>
+    <link rel="stylesheet" href="style.css">  <!-- ✅ External CSS -->
+    <script src="https://cdn.tailwindcss.com"></script> 
+</head>
+<body>
+
+    <!-- 🔍 Search Bar -->
+    <div class="search-container">
+        <input type="text" id="searchInput" class="search-bar" autocomplete="off" placeholder="Search a planet...">
+        <ul id="searchSuggestions" class="search-suggestions"></ul>
+    </div>
+
+    <!-- 🪐 Planet Info Panel -->
+    <div id="planetInfoPanel" class="planet-info">
+        <button id="closeInfoPanel" class="close-btn">✖</button>
+        <img id="planetImage" class="planet-image" src="" alt="Planet Image">
+        <h2 id="planetName"></h2>
+        <p id="planetDescription"></p>
+    </div>
+
+    <button id="toggleSpaceshipMode" class="hud-button">🚀 Spaceship Mode</button>
+    <button id="goBackButton" style="display: none;">Go Back</button>
+
+    <div id="planetInfoPanel" class="planet-info-panel">
+        <button id="closeInfoPanel">Close</button>
+        <h2 id="planetName"></h2>
+        <p><strong>Diameter:</strong> <span id="planetDiameter"></span></p>
+        <p><strong>Distance from Sun:</strong> <span id="planetDistance"></span></p>
+        <p><strong>Orbital Period:</strong> <span id="planetOrbitalPeriod"></span></p>
+        <p><strong>Moons:</strong> <span id="planetMoons"></span></p>
+    </div>
+    
+    
+    
+
+    <style>
+        .hud-button {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            padding: 10px 15px;
+            background: rgba(0, 0, 0, 0.7);
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            z-index: 100;
+        }
+    
+        .hud-button:hover {
+            background: rgba(0, 0, 0, 0.9);
+        }
+    </style>
+
+    <!-- 🌌 Load Three.js & GSAP -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+
+    <!-- 🚀 Load JavaScript Modules -->
+    <script type="module" src="main.js"></script>
+    <script type="module" src="searchHandler.js"></script>
+    <script type="module" src="planetInfo.js"></script>
+
+</body>
+</html>
