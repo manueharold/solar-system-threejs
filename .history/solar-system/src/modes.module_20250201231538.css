@@ -1,0 +1,24 @@
+/* Space theme for mode toggle buttons */
+.mode-buttons {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    display: flex;
+    gap: 10px;
+    z-index: 100;
+}
+
+.mode-button {
+    padding: 10px 15px;
+    background: rgba(0, 0, 0, 0.7);
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 16px;
+    transition: background 0.3s ease;
+}
+
+.mode-button:hover {
+    background: rgba(0, 0, 0, 0.9);
+}

@@ -1,0 +1,243 @@
+/* 🌌 General Styles */
+body {
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+    background-color: #000;
+    font-family: Arial, sans-serif;
+  }
+
+/* 🔍 Search Bar - Space-Themed */
+.search-container {
+    position: absolute;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 280px; /* Reduced width */
+    z-index: 100;
+}
+
+.search-bar {
+    width: 100%;
+    padding: 12px;
+    border-radius: 12px; /* Rounded edges */
+    border: none;
+    background: rgba(255, 255, 255, 0.15);
+    backdrop-filter: blur(10px);
+    color: white;
+    font-size: 16px;
+    outline: none;
+    transition: all 0.3s ease-in-out;
+    box-shadow: 0 0 8px rgba(255, 255, 255, 0.2);
+}
+
+.search-bar:focus {
+    background: rgba(255, 255, 255, 0.25);
+    box-shadow: 0 0 12px rgba(255, 255, 255, 0.4);
+}
+
+/* Search Suggestions */
+.search-suggestions {
+    position: absolute;
+    width: 100%;
+    background: rgba(0, 0, 0, 0.85);
+    border-radius: 10px;
+    padding: 8px 0;
+    margin-top: 5px;
+    list-style: none;
+    color: white;
+    font-size: 16px;
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.4);
+    display: none;
+}
+
+.search-suggestions li {
+    padding: 10px 15px;
+    cursor: pointer;
+    transition: background 0.2s ease-in-out;
+}
+
+.search-suggestions li:hover {
+    background: rgba(255, 255, 255, 0.2);
+}
+
+/* HUD Buttons */
+.hud-buttons {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    display: flex;
+    gap: 8px; /* Reduced space between buttons */
+    z-index: 100;
+}
+
+/* HUD Button Styling (space theme) */
+.hud-button {
+    padding: 10px 15px; /* Reduced size */
+    background: linear-gradient(45deg, rgba(0, 255, 255, 0.6), rgba(0, 0, 255, 0.6));
+    color: #fff;
+    border: 2px solid rgba(0, 255, 255, 0.7);
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 14px; /* Reduced font size */
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    box-shadow: 0 0 10px rgba(0, 255, 255, 0.6), 0 0 20px rgba(0, 0, 255, 0.4);
+    transition: all 0.3s ease;
+}
+
+.hud-button:hover {
+    background: linear-gradient(45deg, rgba(0, 255, 255, 0.8), rgba(0, 0, 255, 0.8));
+    border-color: rgba(0, 255, 255, 1);
+    box-shadow: 0 0 20px rgba(0, 255, 255, 0.8), 0 0 30px rgba(0, 0, 255, 0.6);
+    transform: scale(1.1);
+}
+
+.hud-button:active {
+    background: linear-gradient(45deg, rgba(0, 255, 255, 0.4), rgba(0, 0, 255, 0.4));
+    box-shadow: 0 0 10px rgba(0, 255, 255, 0.4), 0 0 15px rgba(0, 0, 255, 0.3);
+    transform: scale(1);
+}
+
+/* Close Planet Info Button */
+.close-btn {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: none;
+    border: none;
+    color: #fff;
+    font-size: 24px;
+    cursor: pointer;
+    transition: color 0.3s ease;
+    text-shadow: 0 0 10px rgba(0, 255, 255, 0.7), 0 0 15px rgba(0, 0, 255, 0.7);
+}
+
+.close-btn:hover {
+    color: #ff4d4d;
+    text-shadow: 0 0 20px #ff4d4d, 0 0 30px #ff4d4d;
+}
+
+/* Planet Info Panel */
+.planet-info {
+    position: absolute;
+    top: 50%;
+    right: -400px;
+    transform: translateY(-50%);
+    width: 340px;
+    background: rgba(0, 0, 0, 0.1);
+    backdrop-filter: blur(12px);
+    padding: 24px;
+    border-radius: 18px;
+    color: white;
+    box-shadow: 0px 10px 20px rgba(0, 0, 0, 0.4);
+    opacity: 0;
+    transition: right 0.4s ease-in-out, opacity 0.3s ease-in-out;
+}
+
+.planet-info.active {
+    right: 20px;
+    opacity: 1;
+}
+
+/* Planet Info Panel - Space Styling */
+.planet-info h2 {
+    text-transform: capitalize;
+    margin-bottom: 8px;
+    text-shadow: 0 0 8px rgba(0, 255, 255, 0.8);
+}
+
+.planet-info p {
+    margin-bottom: 12px;
+}
+
+.planet-image {
+    display: none;
+}
+
+/* Custom Hover Effects for Buttons */
+.mode-button {
+    background: linear-gradient(45deg, rgba(0, 0, 255, 0.7), rgba(255, 0, 255, 0.7));
+    padding: 8px 12px; /* Reduced size */
+    border: none;
+    border-radius: 5px;
+    color: white;
+    font-size: 14px; /* Reduced font size */
+    cursor: pointer;
+    text-transform: uppercase;
+    letter-spacing: 1.2px;
+    box-shadow: 0 0 10px rgba(0, 0, 255, 0.7), 0 0 15px rgba(255, 0, 255, 0.5);
+    transition: all 0.3s ease;
+}
+
+.mode-button:hover {
+    background: linear-gradient(45deg, rgba(0, 0, 255, 0.9), rgba(255, 0, 255, 0.9));
+    box-shadow: 0 0 20px rgba(0, 0, 255, 0.9), 0 0 25px rgba(255, 0, 255, 0.8);
+}
+
+.mode-button:active {
+    transform: scale(1);
+    box-shadow: 0 0 15px rgba(0, 0, 255, 0.5), 0 0 10px rgba(255, 0, 255, 0.3);
+}
+
+/* Left UI Container */
+.left-ui {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    background: rgba(0, 0, 50, 0.8);
+    padding: 15px;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
+  }
+  
+  /* Dropdown Styles */
+  .planet-select {
+    padding: 10px;
+    background-color: #1e1e3f;
+    color: white;
+    border: 1px solid #444;
+    border-radius: 5px;
+    outline: none;
+    cursor: pointer;
+    transition: background 0.3s ease;
+  }
+  
+  .planet-select:hover {
+    background-color: #333366;
+  }
+  
+  /* Compare Button Styles */
+  .compare-button {
+    padding: 12px;
+    background: linear-gradient(90deg, #00c6ff, #0072ff);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: transform 0.2s ease, background 0.3s ease;
+  }
+  
+  .compare-button:hover {
+    transform: scale(1.05);
+    background: linear-gradient(90deg, #0072ff, #00c6ff);
+  }
+  
+  .compare-button:active {
+    transform: scale(0.95);
+  }
+  
+  /* Canvas (Three.js) */
+  canvas {
+    display: block;
+  }
+  
+  /* Remove Zoom Limits */
+  body {
+    min-zoom: none;
+    max-zoom: none;
+  }

@@ -1,0 +1,63 @@
+/* Left-Side Toolbar Container */
+#toolbar {
+    position: absolute;
+    top: 50%;
+    left: 10px;
+    transform: translateY(-50%);
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    z-index: 1000; /* Ensures it stays on top */
+  }
+  
+  /* Icon Container */
+  #toolbar .icon {
+    position: relative;
+    width: 40px;
+    height: 40px;
+    cursor: pointer;
+  }
+  
+  /* Icon Images */
+  #toolbar .icon img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    transition: transform 0.2s ease;
+  }
+  
+  /* Hover Effect on Icon */
+  #toolbar .icon:hover img {
+    transform: scale(1.1);
+  }
+  
+  /* Custom Tooltip (using CSS ::after pseudo-element) */
+  #toolbar .icon::after {
+    content: attr(title);
+    position: absolute;
+    left: 50px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: rgba(0, 0, 0, 0.8);
+    color: #fff;
+    padding: 4px 8px;
+    border-radius: 4px;
+    white-space: nowrap;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s ease-in-out;
+    font-size: 14px;
+  }
+  
+  /* Show Tooltip on Hover */
+  #toolbar .icon:hover::after {
+    opacity: 1;
+  }
+  
+  /* Optional: Active Icon Style (if you want to visually indicate the active mode) */
+  #toolbar .icon.active {
+    border: 2px solid #00ff00;
+    border-radius: 4px;
+    padding: 2px;
+  }
+  

@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Solar System</title>
+    <!-- Link to your CSS -->
+    <link rel="stylesheet" href="style.css" />
+    <!-- Google Font (Orbitron) -->
+    <link
+      href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700&display=swap"
+      rel="stylesheet"
+    />
+    <!-- Tailwind (if you still need it) -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome for icons -->
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+      integrity="sha512-papNMxoj+9p1x6C69p8O16pLL50FxWVl23fMRX1I3RjWQ+pYSl+X5qAq7KpX4k+nC8VXhLHBH6+Q9j+Ge+4Rkw=="
+      crossorigin="anonymous"
+      referrerpolicy="no-referrer"
+    />
+  </head>
+  <body>
+    <!-- Left Toolbar: Icon Only -->
+    <div class="toolbar-left">
+      <!-- Each button is now just an icon -->
+      <button id="toggleSearch" class="icon-btn" title="Search">
+        <i class="fas fa-search"></i>
+      </button>
+      <button id="toggleSpaceshipMode" class="icon-btn" title="Spaceship Mode">
+        <i class="fas fa-rocket"></i>
+      </button>
+      <button id="toggleOrbitMode" class="icon-btn" title="Orbit Mode">
+        <i class="fas fa-globe"></i>
+      </button>
+      <button id="toggleCompare" class="icon-btn" title="Compare Planets">
+        <i class="fas fa-balance-scale"></i>
+      </button>
+    </div>
+
+    <!-- Hidden Panels -->
+    <!-- Search Panel -->
+    <div id="searchPanel" class="hidden-panel">
+      <input
+        type="text"
+        id="searchInput"
+        class="search-bar"
+        autocomplete="off"
+        placeholder="Search a planet..."
+      />
+      <ul id="searchSuggestions" class="search-suggestions"></ul>
+    </div>
+
+    <!-- Compare Panel -->
+    <div id="comparePanel" class="hidden-panel">
+      <select id="planetSelect1" class="planet-select">
+        <option value="earth">Earth</option>
+        <option value="mars">Mars</option>
+        <option value="jupiter">Jupiter</option>
+        <option value="venus">Venus</option>
+        <option value="saturn">Saturn</option>
+        <option value="neptune">Neptune</option>
+        <option value="uranus">Uranus</option>
+        <option value="mercury">Mercury</option>
+        <option value="moon">Moon</option>
+        <option value="sun">Sun</option>
+      </select>
+
+      <select id="planetSelect2" class="planet-select">
+        <option value="earth">Earth</option>
+        <option value="mars">Mars</option>
+        <option value="jupiter">Jupiter</option>
+        <option value="venus">Venus</option>
+        <option value="saturn">Saturn</option>
+        <option value="neptune">Neptune</option>
+        <option value="uranus">Uranus</option>
+        <option value="mercury">Mercury</option>
+        <option value="moon">Moon</option>
+        <option value="sun">Sun</option>
+      </select>
+
+      <button id="compareButton" class="compare-button">
+        Compare Planets
+      </button>
+    </div>
+
+    <!-- (Optional) If you want your mode buttons to trigger additional UI,
+         you can also include panels or simply use them as toggles directly.
+         For now, they are assumed to be processed by your existing JS code. -->
+
+    <!-- Planet Info Panel (unchanged) -->
+    <div id="planetInfoPanel" class="planet-info">
+      <button id="closeInfoPanel" class="close-btn">✖</button>
+      <img id="planetImage" class="planet-image" src="" alt="Planet Image" />
+      <h2 id="planetName"></h2>
+      <p id="planetDescription"></p>
+      <p><strong>Diameter:</strong> <span id="planetDiameter"></span></p>
+      <p>
+        <strong>Distance from Sun:</strong>
+        <span id="planetDistance"></span>
+      </p>
+      <p>
+        <strong>Orbital Period:</strong>
+        <span id="planetOrbitalPeriod"></span>
+      </p>
+      <p><strong>Moons:</strong> <span id="planetMoons"></span></p>
+    </div>
+
+    <!-- Three.js and other scripts -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <!-- OrbitControls -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/OrbitControls.min.js"></script>
+
+    <!-- Application Scripts -->
+    <script type="module" src="spaceshipControls.js"></script>
+    <script type="module" src="main.js"></script>
+
+    <!-- Inline JS for toggling panels -->
+    <script>
+      // Helper function to toggle display of a panel
+      function togglePanel(panelId) {
+        const panel = document.getElementById(panelId);
+        if (panel.style.display === "block") {
+          panel.style.display = "none";
+        } else {
+          panel.style.display = "block";
+        }
+      }
+
+      document.getElementById("toggleSearch").addEventListener("click", () => {
+        togglePanel("searchPanel");
+      });
+
+      document.getElementById("toggleCompare").addEventListener("click", () => {
+        togglePanel("comparePanel");
+      });
+
+      // Note: For mode buttons (spaceship and orbit), you may
+      // want to trigger your existing functionality directly.
+      // For example:
+      document
+        .getElementById("toggleSpaceshipMode")
+        .addEventListener("click", () => {
+          // Call your spaceship mode function here, for example:
+          // activateSpaceshipMode();
+          console.log("Spaceship Mode toggled");
+        });
+
+      document.getElementById("toggleOrbitMode").addEventListener("click", () => {
+        // Call your orbit mode function here:
+        // activateOrbitMode();
+        console.log("Orbit Mode toggled");
+      });
+    </script>
+  </body>
+</html>

@@ -1,0 +1,260 @@
+body, html {
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  width: 100%;
+  height: 100%;
+  font-family: 'Orbitron', sans-serif; /* Space-inspired font */
+}
+
+/* Left Toolbar: Space theme */
+.toolbar-left {
+  position: absolute;
+  top: 20px;
+  left: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  z-index: 200;
+  background: rgba(0, 0, 0, 0.6); /* Space-themed background */
+  padding: 15px;
+  border-radius: 12px;
+  box-shadow: 0 4px 15px rgba(255, 255, 255, 0.2); /* Glow effect */
+}
+
+/* Toolbar buttons (icon and label) */
+.icon-btn {
+  background: none;
+  border: none;
+  color: white;
+  font-size: 24px;
+  cursor: pointer;
+  padding: 10px;
+  display: flex;
+  align-items: center; /* Align text and icon */
+  gap: 8px; /* Space between icon and label */
+  transition: transform 0.3s ease, color 0.3s ease;
+}
+
+/* Button hover effect */
+.icon-btn:hover {
+  transform: scale(1.1);
+  color: #00c6ff; /* Spacey glowing effect */
+}
+
+/* Text label styling */
+.icon-label {
+  color: white;
+  font-size: 14px;
+  text-transform: capitalize;
+  letter-spacing: 1px;
+  white-space: nowrap; /* Prevent text from wrapping */
+}
+
+/* Space theme button hover text effect */
+.icon-btn:hover .icon-label {
+  color: #00c6ff;
+}
+
+.hidden-panel {
+  display: none;
+}
+
+/* 🔍 Search Bar - Same as before */
+.search-bar {
+  width: 100%;
+  padding: 12px;
+  border-radius: 12px;
+  border: none;
+  background: rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(10px);
+  color: white;
+  font-size: 16px;
+  outline: none;
+  transition: all 0.3s ease-in-out;
+  box-shadow: 0 0 8px rgba(255, 255, 255, 0.2);
+}
+
+.search-bar:focus {
+  background: rgba(255, 255, 255, 0.25);
+  box-shadow: 0 0 12px rgba(255, 255, 255, 0.4);
+}
+
+/* Search Suggestions */
+.search-suggestions {
+  width: 100%;
+  background: rgba(0, 0, 0, 0.85);
+  border-radius: 10px;
+  padding: 8px 0;
+  margin-top: 5px;
+  list-style: none;
+  color: white;
+  font-size: 16px;
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.4);
+  display: none; /* Preserved from your original code */
+}
+
+.search-suggestions li {
+  padding: 10px 15px;
+  cursor: pointer;
+  transition: background 0.2s ease-in-out;
+}
+
+.search-suggestions li:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+/* Dropdown Styles (for compare panel) */
+.planet-select {
+  width: 100%;
+  padding: 10px;
+  background-color: #1e1e3f;
+  color: white;
+  border: 1px solid #444;
+  border-radius: 5px;
+  outline: none;
+  cursor: pointer;
+  transition: background 0.3s ease;
+  margin-bottom: 10px;
+}
+
+.planet-select:hover {
+  background-color: #333366;
+}
+
+/* Compare Button Styles */
+.compare-button {
+  width: 100%;
+  padding: 12px;
+  background: linear-gradient(90deg, #00c6ff, #0072ff);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: bold;
+  transition: transform 0.2s ease, background 0.3s ease;
+}
+
+@keyframes fadeIn {
+  0% { opacity: 0; }
+  100% { opacity: 1; }
+}
+
+.compare-button:hover {
+  transform: scale(1.05);
+  background: linear-gradient(90deg, #0072ff, #00c6ff);
+}
+
+.compare-button:active {
+  transform: scale(0.95);
+}
+
+/* Planet Info Panel (unchanged) */
+.planet-info {
+  position: absolute;
+  top: 50%;
+  right: -400px;
+  transform: translateY(-50%);
+  width: 340px;
+  background: rgba(0, 0, 0, 0.1);
+  backdrop-filter: blur(12px);
+  padding: 24px;
+  border-radius: 18px;
+  color: white;
+  box-shadow: 0px 10px 20px rgba(0, 0, 0, 0.4);
+  opacity: 0;
+  transition: right 0.4s ease-in-out, opacity 0.3s ease-in-out;
+  z-index: 100;
+}
+
+.planet-info.active {
+  right: 20px;
+  opacity: 1;
+}
+
+.planet-info h2 {
+  text-transform: capitalize;
+  margin-bottom: 8px;
+  text-shadow: 0 0 8px rgba(0, 255, 255, 0.8);
+}
+
+.planet-info p {
+  margin-bottom: 12px;
+}
+
+.planet-image {
+  display: none;
+}
+
+/* Close Planet Info Button */
+.close-btn {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: none;
+  border: none;
+  color: #fff;
+  font-size: 24px;
+  cursor: pointer;
+  transition: color 0.3s ease;
+  text-shadow: 0 0 10px rgba(0, 255, 255, 0.7),
+    0 0 15px rgba(0, 0, 255, 0.7);
+}
+
+.close-btn:hover {
+  color: #ff4d4d;
+  text-shadow: 0 0 20px #ff4d4d, 0 0 30px #ff4d4d;
+}
+
+/* Canvas (Three.js) */
+canvas {
+  display: block;
+  z-index: 1; /* Ensures canvas stays behind UI elements */
+}
+
+/* Remove Zoom Limits */
+body {
+  min-zoom: none;
+  max-zoom: none;
+}
+
+/* Search Panel Styles */
+#searchPanel {
+  display: none;
+  position: fixed;
+  top: 10%; /* Center vertically */
+  left: 50%; /* Center horizontally */
+  transform: translate(-50%, -50%); /* Center the panel exactly */
+  background: rgba(0, 0, 0, 0.85);
+  padding: 16px;
+  border-radius: 10px;
+  width: 300px;
+  z-index: 150;
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.5);
+  opacity: 0; /* Start hidden */
+  transition: opacity 0.4s ease, transform 0.3s ease;
+}
+
+/* When the search panel is visible, we'll animate it */
+#searchPanel.visible {
+  opacity: 1;
+  transform: translate(-50%, -50%) scale(1);
+}
+
+/* Search Input Styling */
+#searchInput {
+  background: rgba(255, 255, 255, 0.1);
+  color: white;
+  padding: 12px;
+  border-radius: 6px;
+  width: 100%;
+  border: none;
+  outline: none;
+  transition: background 0.3s;
+}
+
+/* When the search input is focused */
+#searchInput:focus {
+  background: rgba(255, 255, 255, 0.2);
+}
+

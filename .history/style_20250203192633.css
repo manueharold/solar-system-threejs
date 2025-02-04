@@ -1,0 +1,96 @@
+/* 🌌 General Styles */
+body, html {
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  width: 100%;
+  height: 100%;
+  font-family: 'Orbitron', sans-serif; /* Space-inspired font */
+}
+
+/* Left Toolbar: Space theme */
+.toolbar-left {
+  position: absolute;
+  top: 20px;
+  left: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  z-index: 200;
+  background: rgba(0, 0, 0, 0.6); /* Space-themed background */
+  padding: 15px;
+  border-radius: 12px;
+  box-shadow: 0 4px 15px rgba(255, 255, 255, 0.2); /* Glow effect */
+}
+
+/* Toolbar buttons (icon and label) */
+.icon-btn {
+  background: none;
+  border: none;
+  color: white;
+  font-size: 24px;
+  cursor: pointer;
+  padding: 10px;
+  display: flex;
+  align-items: center; /* Align text and icon */
+  gap: 8px; /* Space between icon and label */
+  transition: transform 0.3s ease, color 0.3s ease;
+}
+
+/* Button hover effect */
+.icon-btn:hover {
+  transform: scale(1.1);
+  color: #00c6ff; /* Spacey glowing effect */
+}
+
+/* Text label styling */
+.icon-label {
+  color: white;
+  font-size: 14px;
+  text-transform: capitalize;
+  letter-spacing: 1px;
+  white-space: nowrap; /* Prevent text from wrapping */
+}
+
+/* Space theme button hover text effect */
+.icon-btn:hover .icon-label {
+  color: #00c6ff;
+}
+
+/* Hidden panel for the search bar (default state) */
+.hidden-panel {
+  display: none;
+}
+
+/* Search Bar */
+#searchPanel {
+  position: absolute;
+  top: 20px;
+  left: 50px; /* Adjust the positioning */
+  background: rgba(0, 0, 0, 0.8);
+  padding: 10px;
+  border-radius: 8px;
+  display: none; /* Initially hidden */
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.4);
+  z-index: 150;
+}
+
+.search-bar {
+  width: 250px;
+  padding: 12px;
+  border-radius: 12px;
+  border: none;
+  background: rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(10px);
+  color: white;
+  font-size: 16px;
+  outline: none;
+  transition: all 0.3s ease-in-out;
+  box-shadow: 0 0 8px rgba(255, 255, 255, 0.2);
+}
+
+/* Focused Search Bar */
+.search-bar:focus {
+  background: rgba(255, 255, 255, 0.25);
+  box-shadow: 0 0 12px rgba(255, 255, 255, 0.4);
+}

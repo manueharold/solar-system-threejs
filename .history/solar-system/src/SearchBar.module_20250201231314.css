@@ -1,0 +1,54 @@
+/* 🌌 General Styles */
+.searchContainer {
+    position: absolute;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 320px;
+    z-index: 100;
+  }
+  
+  .searchBar {
+    width: 100%;
+    padding: 14px;
+    border-radius: 15px;
+    border: none;
+    background: rgba(255, 255, 255, 0.15);
+    backdrop-filter: blur(10px);
+    color: white;
+    font-size: 18px;
+    outline: none;
+    transition: all 0.3s ease-in-out;
+    box-shadow: 0 0 8px rgba(255, 255, 255, 0.2);
+  }
+  
+  .searchBar:focus {
+    background: rgba(255, 255, 255, 0.25);
+    box-shadow: 0 0 12px rgba(255, 255, 255, 0.4);
+  }
+  
+  /* 🔍 Search Suggestions */
+  .searchSuggestions {
+    position: absolute;
+    width: 100%;
+    background: rgba(0, 0, 0, 0.85);
+    border-radius: 10px;
+    padding: 8px 0;
+    margin-top: 5px;
+    list-style: none;
+    color: white;
+    font-size: 16px;
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.4);
+    display: none;
+  }
+  
+  .searchSuggestions li {
+    padding: 10px 15px;
+    cursor: pointer;
+    transition: background 0.2s ease-in-out;
+  }
+  
+  .searchSuggestions li:hover {
+    background: rgba(255, 255, 255, 0.2);
+  }
+  

@@ -1,0 +1,45 @@
+<body>
+  <!-- Search Bar -->
+  <div class="search-container">
+      <input type="text" id="searchInput" class="search-bar" autocomplete="off" placeholder="Search a planet...">
+      <ul id="searchSuggestions" class="search-suggestions"></ul>
+  </div>
+
+  <!-- Planet Info Panel -->
+  <div id="planetInfoPanel" class="planet-info">
+      <button id="closeInfoPanel" class="close-btn">✖</button>
+      <img id="planetImage" class="planet-image" src="" alt="Planet Image">
+      <h2 id="planetName"></h2>
+      <p id="planetDescription"></p>
+      <p><strong>Diameter:</strong> <span id="planetDiameter"></span></p>
+      <p><strong>Distance from Sun:</strong> <span id="planetDistance"></span></p>
+      <p><strong>Orbital Period:</strong> <span id="planetOrbitalPeriod"></span></p>
+      <p><strong>Moons:</strong> <span id="planetMoons"></span></p>
+  </div>
+
+  <!-- Left-Side Toolbar -->
+  <div id="toolbar">
+    <!-- Spaceship Mode Icon -->
+    <div class="icon" id="toggleSpaceshipMode" title="Spaceship Mode">
+      <img src="icons/spaceship.png" alt="Spaceship Mode">
+    </div>
+    <!-- Orbit Mode Icon -->
+    <div class="icon" id="toggleOrbitMode" title="Orbit Mode">
+      <img src="icons/orbit.png" alt="Orbit Mode">
+    </div>
+    <!-- Compare Planets Icon -->
+    <div class="icon" id="toggleCompare" title="Compare Planets">
+      <img src="icons/compare.png" alt="Compare Planets">
+    </div>
+  </div>
+
+  <!-- Three.js Scripts -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+  <!-- OrbitControls -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/OrbitControls.min.js"></script>
+
+  <!-- Application Scripts -->
+  <script type="module" src="spaceshipControls.js"></script>  <!-- Your spaceship controls -->
+  <script type="module" src="main.js"></script> <!-- The main script that initializes the scene -->
+</body>

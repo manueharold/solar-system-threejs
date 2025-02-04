@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Solar System</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body>
+    <!-- Search Bar -->
+    <div class="search-container">
+        <input type="text" id="searchInput" class="search-bar" autocomplete="off" placeholder="Search a planet...">
+        <ul id="searchSuggestions" class="search-suggestions"></ul>
+    </div>
+
+    <!-- Planet Info Panel -->
+    <div id="planetInfoPanel" class="planet-info">
+        <button id="closeInfoPanel" class="close-btn">✖</button>
+        <img id="planetImage" class="planet-image" src="" alt="Planet Image">
+        <h2 id="planetName"></h2>
+        <p id="planetDescription"></p>
+        <p><strong>Diameter:</strong> <span id="planetDiameter"></span></p>
+        <p><strong>Distance from Sun:</strong> <span id="planetDistance"></span></p>
+        <p><strong>Orbital Period:</strong> <span id="planetOrbitalPeriod"></span></p>
+        <p><strong>Moons:</strong> <span id="planetMoons"></span></p>
+    </div>
+
+    <!-- HUD Buttons -->
+    <div class="hud-buttons">
+        <button id="toggleSpaceshipMode" class="hud-button">🚀 Spaceship Mode</button>
+        <button id="toggleOrbitMode" class="hud-button">🌍 Orbit Mode</button>
+    </div>
+
+    <div class="left-ui">
+        <select id="planetSelect1" class="planet-select">
+          <option value="earth">Earth</option>
+          <option value="mars">Mars</option>
+          <option value="jupiter">Jupiter</option>
+          <option value="venus">Venus</option>
+          <option value="saturn">Saturn</option>
+          <option value="neptune">Neptune</option>
+          <option value="uranus">Uranus</option>
+          <option value="mercury">Mercury</option>
+          <option value="moon">Moon</option>
+          <option value="sun">Sun</option>
+        </select>
+  
+        <select id="planetSelect2" class="planet-select">
+          <option value="earth">Earth</option>
+          <option value="mars">Mars</option>
+          <option value="jupiter">Jupiter</option>
+          <option value="venus">Venus</option>
+          <option value="saturn">Saturn</option>
+          <option value="neptune">Neptune</option>
+          <option value="uranus">Uranus</option>
+          <option value="mercury">Mercury</option>
+          <option value="moon">Moon</option>
+          <option value="sun">Sun</option>
+        </select>
+  
+        <button id="compareButton" class="compare-button">
+          Compare Planets
+        </button>
+      </div>
+    
+    <!-- Button to trigger the compare function -->
+    <button id="compareButton">Compare Planets</button>
+  
+
+    <!-- Three.js Scripts -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    
+    <!-- OrbitControls -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/OrbitControls.min.js"></script>
+
+    <!-- Application Scripts -->
+    <script type="module" src="spaceshipControls.js"></script>  <!-- Your spaceship controls -->
+    <script type="module" src="main.js"></script> <!-- The main script that initializes the scene -->
+</body>
+</html>

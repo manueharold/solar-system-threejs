@@ -1,0 +1,51 @@
+/* 🪐 Planet Info Panel */
+.planetInfo {
+    position: absolute;
+    top: 50%;
+    right: -400px; /* Hidden initially */
+    transform: translateY(-50%);
+    width: 340px;
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(12px);
+    padding: 24px;
+    border-radius: 18px;
+    color: white;
+    box-shadow: 0px 10px 20px rgba(0, 0, 0, 0.4);
+    opacity: 0;
+    transition: right 0.4s ease-in-out, opacity 0.3s ease-in-out;
+  }
+  
+  .planetInfo.active {
+    right: 20px; /* Move into view */
+    opacity: 1;
+  }
+  
+  .planetImage {
+    display: none;
+  }
+  
+  .planetInfo h2 {
+    text-transform: capitalize;
+    margin-bottom: 8px;
+  }
+  
+  .planetInfo p {
+    margin-bottom: 12px;
+  }
+  
+  /* ❌ Close Button */
+  .closeBtn {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: none;
+    border: none;
+    color: white;
+    font-size: 22px;
+    cursor: pointer;
+  }
+  
+  .closeBtn:hover {
+    color: #ff4d4d;
+  }
+  
