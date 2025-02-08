@@ -1,0 +1,71 @@
+import * as THREE from "https://cdn.skypack.dev/three@0.129.0/build/three.module.js";
+import { loadPlanets, planetData } from "./loadPlanets.js";
+
+export async function loadDefaultPlanets(scene, camera, controls) {
+  // ----- Remove Orbit Mode Elements -----
+  const orbitModeGroup = scene.getObjectByName("orbitModeGroup");
+  if (orbitModeGroup) {
+    scene.remove(orbitModeGroup);
+    console.log("Removed orbit mode group.");
+  }
+
+  // Remove any orbit lines (assuming they’re THREE.Line objects with "orbit" in the name)
+  scene.traverse((child) => {
+    if (child.type === "Line" && child.name && child.name.includes("orbit")) {
+      scene.remove(child);
+      console.log(`Removed orbit line: ${child.name}`);
+    }
+  });
+
+  // Remove all existing planet objects to prevent duplicates.
+  const planetNames = [
+    "sun",
+    "mercury",
+    "venus",
+    "earth",
+    "mars",
+    "jupiter",
+    "saturn",
+    "uranus",
+    "neptune",
+    "moon"
+  ];
+  planetNames.forEach((name) => {
+    const obj = scene.getObjectByName(name);
+    if (obj) {
+      obj.traverse((child) => {
+        if (child.isMesh) {
+          child.geometry.dispose();
+          if (child.material.map) child.material.map.dispose();
+          child.material.dispose();
+        }
+      });
+      scene.remove(obj);
+      console.log(`Removed ${name} from scene and cleared memory.`);
+    }
+  });
+
+   // Load planets
+   await loadPlanets(scene);
+   console.log("Default planets reloaded.");
+ 
+   // Ensure the camera is positioned after planets are loaded
+   const earthPosition = new THREE.Vector3(planetData.earth.distance, 0, 0);
+   const offsetY = 5000; // vertical offset
+   const offsetZ = 8000; // depth offset
+ 
+   camera.position.set(
+     earthPosition.x,
+     earthPosition.y + offsetY,
+     earthPosition.z + offsetZ
+   );
+   camera.lookAt(earthPosition);
+ 
+   // Fix controls target
+   if (controls) {
+     controls.target.copy(earthPosition);
+     controls.update();
+   }
+ 
+   console.log("Camera repositioned after planets are loaded.");
+ }

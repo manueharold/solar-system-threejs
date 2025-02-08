@@ -33,20 +33,19 @@ export async function loadDefaultPlanets(scene, camera, controls) {
   planetNames.forEach((name) => {
     const obj = scene.getObjectByName(name);
     if (obj) {
+      obj.traverse((child) => {
+        if (child.isMesh) {
+          child.geometry.dispose();
+          if (child.material.map) child.material.map.dispose();
+          child.material.dispose();
+        }
+      });
       scene.remove(obj);
-      console.log(`Removed ${name} from scene.`);
+      console.log(`Removed ${name} from scene and cleared memory.`);
     }
   });
-
-  // ----- Instantly Set the Camera to Earth -----
-  // We know from planetData that Earth is positioned at [planetData.earth.distance, 0, 0].
-  const earthPosition = new THREE.Vector3(planetData.earth.distance, 0, 0);
   
-  // Adjust the offsets depending on the environment.
-  // On Vercel, we increase the offsets to avoid the camera starting inside Earth.
-  const isVercel = window.location.hostname.includes("vercel");
-  const offsetY = isVercel ? 8000 : 5000; // vertical offset
-  const offsetZ = isVercel ? 12000 : 8000; // depth offset
+
 
   camera.position.set(
     earthPosition.x,
@@ -60,8 +59,26 @@ export async function loadDefaultPlanets(scene, camera, controls) {
   }
   console.log("Camera instantly set to Earth initial position.");
 
-  // ----- Load Default Planets -----
-  // With the camera already positioned at Earth, loadPlanets will add the planets into the scene.
   await loadPlanets(scene);
   console.log("Default planets reloaded.");
+  
+  // Ensure the camera is positioned after planets are loaded
+  const earthPosition = new THREE.Vector3(planetData.earth.distance, 0, 0);
+  const offsetY = 5000; // vertical offset
+  const offsetZ = 8000; // depth offset
+  
+  camera.position.set(
+    earthPosition.x,
+    earthPosition.y + offsetY,
+    earthPosition.z + offsetZ
+  );
+  camera.lookAt(earthPosition);
+  
+  // Fix controls target
+  if (controls) {
+    controls.target.copy(earthPosition);
+    controls.update();
+  }
+  
+  console.log("Camera repositioned after planets are loaded.");
 }

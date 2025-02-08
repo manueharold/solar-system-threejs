@@ -40,14 +40,11 @@ export async function loadDefaultPlanets(scene, camera, controls) {
 
   // ----- Instantly Set the Camera to Earth -----
   // We know from planetData that Earth is positioned at [planetData.earth.distance, 0, 0].
+  // Adjust the Y and Z offsets as needed for your desired "zoomed out" view.
   const earthPosition = new THREE.Vector3(planetData.earth.distance, 0, 0);
+  const offsetY = 5000; // vertical offset
+  const offsetZ = 8000; // depth offset
   
-  // Adjust the offsets depending on the environment.
-  // On Vercel, we increase the offsets to avoid the camera starting inside Earth.
-  const isVercel = window.location.hostname.includes("vercel");
-  const offsetY = isVercel ? 8000 : 5000; // vertical offset
-  const offsetZ = isVercel ? 12000 : 8000; // depth offset
-
   camera.position.set(
     earthPosition.x,
     earthPosition.y + offsetY,
