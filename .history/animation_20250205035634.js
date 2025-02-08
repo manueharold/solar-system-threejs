@@ -1,0 +1,27 @@
+import * as THREE from "three"; // Ensure THREE is imported if not already
+import { updateOrbitModeAnimation } from './loadOrbitPlanets.js';
+import { updatePlanets } from './loadPlanets.js';
+
+// ================================
+// ANIMATION LOOP
+// ================================
+export function startAnimation(scene, camera, renderer, controls) {
+    const clock = new THREE.Clock();
+
+    function animate() {
+        requestAnimationFrame(animate);
+
+        const deltaTime = clock.getDelta();
+
+        // Update orbit mode animations if active
+        updateOrbitModeAnimation(deltaTime);
+
+        // Update default planets animations (pass in deltaTime)
+        updatePlanets(deltaTime);
+
+        controls.update();
+        renderer.render(scene, camera);
+    }
+
+    animate();
+}

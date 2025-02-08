@@ -1,0 +1,150 @@
+/* ==========================================================================
+   Global Base Styles
+   ========================================================================== */
+   body, html {
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+    width: 100%;
+    height: 100%;
+    font-family: 'Orbitron', sans-serif; /* Space-inspired font */
+    background-color: #050505; /* Deep space black */
+    color: #ffffff;
+}
+
+/* Canvas */
+canvas {
+    display: block;
+    z-index: 1; /* Ensures canvas stays behind UI elements */
+}
+
+/* ==========================================================================
+     Toolbar (Left Side) Styles
+   ========================================================================== */
+.toolbar-left {
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    z-index: 200;
+    background: rgba(15, 15, 40, 0.8); /* Deep space theme */
+    padding: 15px;
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0, 255, 255, 0.3); /* Glowing effect */
+}
+
+/* Icon Button (Toolbar) */
+.icon-btn {
+    font-size: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    padding: 10px 15px;
+    border: none;
+    background: none;
+    color: #ffffff;
+    transition: all 0.3s ease;
+    cursor: pointer;
+}
+
+.icon-btn i {
+    margin-right: 10px;
+    font-size: 18px;
+}
+
+.icon-btn:hover {
+    transform: scale(1.1);
+    color: #00c6ff;
+    text-shadow: 0 0 10px #00c6ff;
+}
+
+/* ==========================================================================
+     Planet Info Panel
+   ========================================================================== */
+.planet-info {
+    position: absolute;
+    top: 50%;
+    right: -400px;
+    transform: translateY(-50%);
+    width: 360px;
+    background: rgba(15, 15, 40, 0.9);
+    backdrop-filter: blur(8px);
+    padding: 20px;
+    border-radius: 15px;
+    color: white;
+    box-shadow: 0px 10px 30px rgba(0, 255, 255, 0.3);
+    opacity: 0;
+    transition: right 0.4s ease-in-out, opacity 0.3s ease-in-out;
+    z-index: 100;
+}
+
+.planet-info.active {
+    right: 20px;
+    opacity: 1;
+}
+
+.planet-info h2 {
+    text-transform: capitalize;
+    text-shadow: 0 0 10px rgba(0, 255, 255, 0.8);
+    font-size: 22px;
+}
+
+.planet-info p {
+    font-size: 14px;
+    line-height: 1.5;
+}
+
+/* ==========================================================================
+     Close Button Styles
+   ========================================================================== */
+.close-btn {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: none;
+    border: none;
+    color: white;
+    font-size: 24px;
+    cursor: pointer;
+    transition: color 0.3s ease;
+    text-shadow: 0 0 10px rgba(0, 255, 255, 0.8);
+}
+
+.close-btn:hover {
+    color: #ff4d4d;
+    text-shadow: 0 0 20px #ff4d4d;
+}
+
+/* ==========================================================================
+     Buttons & Inputs
+   ========================================================================== */
+.compare-button {
+    width: 100%;
+    padding: 12px;
+    background: linear-gradient(90deg, #00c6ff, #0072ff);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: transform 0.2s ease, background 0.3s ease;
+}
+
+.compare-button:hover {
+    transform: scale(1.05);
+    background: linear-gradient(90deg, #0072ff, #00c6ff);
+}
+
+.compare-button:active {
+    transform: scale(0.95);
+}
+
+/* ==========================================================================
+     Animations
+   ========================================================================== */
+@keyframes fadeIn {
+    0% { opacity: 0; }
+    100% { opacity: 1; }
+}
