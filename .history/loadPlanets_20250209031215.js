@@ -47,12 +47,12 @@ let orbitsEnabled = true;           // (Not used explicitly, but available if ne
 THREE.Cache.enabled = true;
 
 // ===== Loader Setup =====
-const textureLoader = new THREE.TextureLoader();
-const dracoLoader = new DRACOLoader();
-dracoLoader.setDecoderPath("https://cdn.jsdelivr.net/npm/three@0.157.0/examples/jsm/libs/draco/");
-dracoLoader.preload();
-
 const loader = new GLTFLoader();
+const dracoLoader = new DRACOLoader();
+dracoLoader.setDecoderPath(
+  "https://cdn.jsdelivr.net/npm/three@0.157.0/examples/jsm/libs/draco/"
+);
+dracoLoader.preload();
 loader.setDRACOLoader(dracoLoader);
 
 /**
@@ -142,51 +142,39 @@ function loadPlanetAsync(loaderInstance, scene, name, modelPath, position, size)
  */
 export async function loadPlanets(scene) {
   sceneRef = scene;
-  planets = {};
+  planets = {}; // Reset stored planets
 
-  // Set up a LoadingManager for progress tracking.
+  // Set up a LoadingManager for progress/error tracking.
   const manager = new THREE.LoadingManager();
   manager.onStart = (url, itemsLoaded, itemsTotal) =>
     console.log(`Started loading: ${url} (${itemsLoaded}/${itemsTotal})`);
-  manager.onProgress = (url, itemsLoaded, itemsTotal) => {
-    const progressPercentage = (itemsLoaded / itemsTotal) * 100;
-    const loadingBarProgress = document.getElementById("loadingBarProgress");
-    if (loadingBarProgress) {
-      loadingBarProgress.style.width = `${progressPercentage}%`;
-    }
-  };
   manager.onLoad = () => console.log("All assets loaded");
   manager.onError = (url) =>
     console.error(`There was an error loading ${url}`);
 
+  // Create a new loader using the manager.
   const loaderWithManager = new GLTFLoader(manager);
   loaderWithManager.setDRACOLoader(dracoLoader);
+
+  // Helper to load a planet using the loader with manager.
   const loadPlanet = (name, modelPath, position, size) =>
     loadPlanetAsync(loaderWithManager, scene, name, modelPath, position, size);
 
   try {
-    // 1. PRIORITIZE: Load Earth first.
-    await loadPlanet(
+    // Load Earth first.
+    const earthPromise = loadPlanet(
       "earth",
       "https://raw.githubusercontent.com/manueharold/solar-system-threejs/main/3d_models_compressed/earth_draco.glb",
       [planetData.earth.distance, 0, 0],
       planetData.earth.scale * planetData.earth.size
     );
+    await earthPromise;
 
-    // Hide the loading UI once Earth is loaded.
-    const loadingContainer = document.getElementById("loadingContainer");
-    if (loadingContainer) {
-      loadingContainer.style.display = "none";
-    }
-
-    // Start the animation loop immediately so Earth rotates.
-    animateScene();
-
-    // 2. Create the Sun as soon as Earth is loaded.
+    // Create the Sun immediately after Earth.
     createRealisticSun(scene, [planetData.sun.distance, 0, 0], planetData.sun.scale);
 
-    // 3. Load the remaining planets concurrently.
-    Promise.all([
+    // Load the remaining planets concurrently.
+    await Promise.all([
       loadPlanet(
         "mercury",
         "https://cdn.jsdelivr.net/gh/manueharold/solar-system-threejs@main/3d_models_compressed/mercury_draco.glb",
@@ -235,12 +223,11 @@ export async function loadPlanets(scene) {
         [planetData.earth.distance + planetData.moon.distance, 0, 0],
         planetData.moon.scale * planetData.moon.size
       ),
-    ]).catch((error) => {
-      console.error("Error loading planets:", error);
-    });
+    ]);
   } catch (error) {
     console.error("Error loading planets:", error);
   }
+
   // Start the animation loop.
   animateScene();
 }
@@ -263,21 +250,31 @@ export function updateZoomSettings(camera, controls) {
  */
 function animateScene() {
   requestAnimationFrame(animateScene);
+
+  // Rotate all planets (skip Moon if its orbit is paused).
   for (const planetName in planets) {
     const planet = planets[planetName];
     if (rotationSpeeds[planetName] && (planetName !== "moon" || !moonOrbitPaused)) {
       planet.rotation.y += rotationSpeeds[planetName];
     }
   }
+
+  // Update any active planet comparisons.
   updateComparisonRotation();
+
+  // Calculate time delta for smooth animation.
   const currentTime = Date.now();
   const deltaTime = (currentTime - lastFrameTime) * 0.0005;
   lastFrameTime = currentTime;
+
+  // Orbit the Moon around the Earth if not paused.
   if (!moonOrbitPaused && planets["moon"] && planets["earth"]) {
     moonOrbitAngle += deltaTime;
     const moonDistance = planetData.moon.distance;
-    planets["moon"].position.x = planets["earth"].position.x + Math.cos(moonOrbitAngle) * moonDistance;
-    planets["moon"].position.z = planets["earth"].position.z + Math.sin(moonOrbitAngle) * moonDistance;
+    planets["moon"].position.x =
+      planets["earth"].position.x + Math.cos(moonOrbitAngle) * moonDistance;
+    planets["moon"].position.z =
+      planets["earth"].position.z + Math.sin(moonOrbitAngle) * moonDistance;
   }
 }
 
@@ -369,7 +366,8 @@ export function moveToPlanet(planetName, camera, controls, scene, isOrbitModeAct
 }
 
 /**
- * A secondary update function for manual planet rotation updates.
+ * A secondary update function that rotates planets and updates the Moon's orbit.
+ * (This can be called externally if a manual update is desired.)
  */
 export function updatePlanets() {
   for (const planetName in planets) {
@@ -381,7 +379,9 @@ export function updatePlanets() {
   if (planets["moon"] && planets["earth"]) {
     moonOrbitAngle += 0.001;
     const moonDistance = planetData.moon.distance;
-    planets["moon"].position.x = planets["earth"].position.x + Math.cos(moonOrbitAngle) * moonDistance;
-    planets["moon"].position.z = planets["earth"].position.z + Math.sin(moonOrbitAngle) * moonDistance;
+    planets["moon"].position.x =
+      planets["earth"].position.x + Math.cos(moonOrbitAngle) * moonDistance;
+    planets["moon"].position.z =
+      planets["earth"].position.z + Math.sin(moonOrbitAngle) * moonDistance;
   }
 }

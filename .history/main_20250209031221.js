@@ -12,14 +12,20 @@ import { updateOrbitModeAnimation, loadOrbitPlanets } from './loadOrbitPlanets.j
 import * as THREE from "https://cdn.skypack.dev/three@0.129.0/build/three.module.js";
 import { OrbitControls } from "https://cdn.skypack.dev/three@0.129.0/examples/jsm/controls/OrbitControls.js";
 
+
 document.addEventListener('DOMContentLoaded', () => {
+  // ================================
   // INITIALIZATION
+  // ================================
   const { scene, camera, renderer } = initScene();
   let orbitModeActive = true; // Default orbit mode state
 
   const controls = initControls(camera, renderer);
-  controls.minDistance = 10000;
-  controls.maxDistance = 20000;
+
+  // Set zoom limits: a minimum distance (zoom in limit) of 10,000 and a maximum distance (zoom out limit) of 20,000.
+controls.minDistance = 10000;
+controls.maxDistance = 20000;
+  
 
   // Configure renderer and add to DOM
   renderer.setSize(window.innerWidth, window.innerHeight);
@@ -29,20 +35,27 @@ document.addEventListener('DOMContentLoaded', () => {
   renderer.domElement.style.zIndex = "1"; // Ensure canvas is behind UI elements
   document.body.appendChild(renderer.domElement);
 
+  // ================================
   // ENVIRONMENT SETUP
+  // ================================
   initLights(scene);
   initSkybox(scene);
-  loadPlanets(scene); // Loads planets and handles the loading bar UI.
+  loadPlanets(scene);
   handleResize(camera, renderer);
   handleMouseEvents(scene, camera);
 
+  // ================================
   // FEATURE SETUP
+  // ================================
+  // Pass a callback to toggle orbit mode state
   setupModeToggles(scene, camera, controls, (isActive) => {
     orbitModeActive = isActive;
   });
   setupSearchFunctionality(scene, camera, controls);
 
-  // Populate dropdowns for planet selection.
+  // ================================
+  // POPULATE DROPDOWNS (Planet Selection)
+  // ================================
   const planetData = {
     mercury: { name: "Mercury" },
     venus: { name: "Venus" },
@@ -73,28 +86,33 @@ document.addEventListener('DOMContentLoaded', () => {
   }
   populateDropdowns();
 
+  // ================================
   // COMPARE PANEL SETUP
+  // ================================
   const compareButton = document.getElementById('confirmCompareButton');
   const toggleCompareButton = document.getElementById('toggleCompare');
   const comparePanel = document.getElementById('comparePanel');
   const closeComparePanel = document.getElementById('closeComparePanel');
 
-  toggleCompareButton.addEventListener('click', () => {
-    if (window.orbitModeEnabled) {
-      showCompareNotification("You cannot use Compare Planets when in Orbit Mode.", true);
-      return;
-    }
-    if (comparePanel) {
-      comparePanel.style.display = 'block';
-    }
-  });
+  // Open compare panel if not in Orbit Mode; otherwise, show an error notification.
+toggleCompareButton.addEventListener('click', () => {
+  if (window.orbitModeEnabled) {
+    showCompareNotification("You cannot use Compare Planets when in Orbit Mode.", true);
+    return;
+  }
+  if (comparePanel) {
+    comparePanel.style.display = 'block';
+  }
+});
 
+  // Close compare panel
   if (closeComparePanel) {
     closeComparePanel.addEventListener('click', () => {
       comparePanel.style.display = 'none';
     });
   }
 
+  // Notification for comparing planets
   const compareNotification = document.createElement('div');
   compareNotification.style.position = 'fixed';
   compareNotification.style.top = '20px';
@@ -140,14 +158,19 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
-  // ANIMATION LOOP (for Orbit Mode animations)
-  const clock = new THREE.Clock();
-  function animate() {
-    requestAnimationFrame(animate);
-    const deltaTime = clock.getDelta();
-    updateOrbitModeAnimation(deltaTime);
-    controls.update();
-    renderer.render(scene, camera);
-  }
-  animate();
+  // ================================
+  // ANIMATION LOOP
+  // ================================
+const clock = new THREE.Clock();  // Create a clock to track elapsed time
+
+function animate() {
+requestAnimationFrame(animate);
+const deltaTime = clock.getDelta();  // Time elapsed since the last frame (in seconds)
+updateOrbitModeAnimation(deltaTime);  // Update the planet orbits
+controls.update(); // required if controls.enableDamping is true or if damping is desired
+renderer.render(scene, camera);       // Render the scene
+}
+animate();  // Start the animation loop
 });
+
+

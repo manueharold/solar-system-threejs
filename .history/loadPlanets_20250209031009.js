@@ -7,8 +7,6 @@ import { showPlanetInfo, hidePlanetInfo } from "./planetInfo.js";
 import { updateComparisonRotation } from "./comparePlanets.js";
 
 // ===== Configuration & Constants =====
-
-// Planet size, distance, and scale data (realistic values scaled down)
 export const planetData = {
   sun:     { size: 600940, distance: 0,         scale: 100000 },
   mercury: { size: 4879,   distance: 4000000,   scale: 0.5 },
@@ -19,10 +17,9 @@ export const planetData = {
   saturn:  { size: 116460, distance: 35000000,  scale: 1.5 },
   uranus:  { size: 50724,  distance: 45000000,  scale: 1.2 },
   neptune: { size: 49244,  distance: 55000000,  scale: 1.2 },
-  moon:    { size: 3474,   distance: 38000,     scale: 0.2 } // Relative to Earth
+  moon:    { size: 3474,   distance: 38000,     scale: 0.2 }
 };
 
-// Base rotation speed and per-planet factors
 const baseRotationSpeed = 0.002;
 export const rotationSpeeds = {
   mercury: baseRotationSpeed / 58.6,
@@ -36,13 +33,13 @@ export const rotationSpeeds = {
 };
 
 // ===== Global Variables =====
-export const planetTemplates = {};  // Clones for later comparisons
-let planets = {};                   // Stores planet meshes by name
+export const planetTemplates = {};
+let planets = {};
 let sceneRef = null;
 let moonOrbitPaused = false;
 let moonOrbitAngle = 0;
 let lastFrameTime = Date.now();
-let orbitsEnabled = true;           // (Not used explicitly, but available if needed)
+let orbitsEnabled = true;
 
 THREE.Cache.enabled = true;
 
@@ -56,35 +53,25 @@ const loader = new GLTFLoader();
 loader.setDRACOLoader(dracoLoader);
 
 /**
- * Creates a realistic Sun mesh with a texture and an accompanying point light.
- * Also stores the sun in both the planets and planetTemplates collections.
- *
- * @param {THREE.Scene} scene - The scene to add the Sun.
- * @param {Array<number>} position - [x, y, z] coordinates.
- * @param {number} size - Scale factor for the Sun.
- * @returns {THREE.Mesh} The created Sun mesh.
+ * Creates a realistic Sun mesh with texture and point light.
  */
 function createRealisticSun(scene, position, size) {
   const geometry = new THREE.SphereGeometry(1, 64, 64);
-  const textureLoader = new THREE.TextureLoader();
   const sunTexture = textureLoader.load("./textures/8k_sun.jpg");
   const material = new THREE.MeshBasicMaterial({
     map: sunTexture,
     side: THREE.DoubleSide,
   });
-
   const sunMesh = new THREE.Mesh(geometry, material);
   sunMesh.scale.set(size, size, size);
   sunMesh.position.set(...position);
   sunMesh.name = "sun";
   scene.add(sunMesh);
 
-  // Add a point light at the Sun's position
   const sunLight = new THREE.PointLight(0xffffff, 2, 0, 2);
   sunLight.position.copy(sunMesh.position);
   scene.add(sunLight);
 
-  // Store the Sun mesh for later use (e.g., comparisons)
   planets["sun"] = sunMesh;
   planetTemplates["sun"] = sunMesh.clone(true);
   console.log(`✅ Created realistic Sun at [${position}]`);
@@ -92,16 +79,7 @@ function createRealisticSun(scene, position, size) {
 }
 
 /**
- * Loads a GLTF planet model using the provided loader, scales it, and adds it to the scene.
- * The loaded planet is stored in the global planets and planetTemplates objects.
- *
- * @param {GLTFLoader} loaderInstance - The GLTFLoader to use (with manager if needed).
- * @param {THREE.Scene} scene - The scene to add the planet.
- * @param {string} name - The planet's name.
- * @param {string} modelPath - URL/path to the GLTF model.
- * @param {Array<number>} position - [x, y, z] coordinates.
- * @param {number} size - Desired size (usually calculated as scale * planetData.size).
- * @returns {Promise<THREE.Group>} A promise that resolves with the loaded planet.
+ * Loads a GLTF planet model, scales it, and adds it to the scene.
  */
 function loadPlanetAsync(loaderInstance, scene, name, modelPath, position, size) {
   return new Promise((resolve, reject) => {
@@ -112,10 +90,8 @@ function loadPlanetAsync(loaderInstance, scene, name, modelPath, position, size)
         planet.name = name.toLowerCase();
         planet.position.set(...position);
 
-        // Compute a scale factor based on the planet's bounding box size
         const box = new THREE.Box3().setFromObject(planet);
-        const scaleFactor =
-          size / box.getSize(new THREE.Vector3()).length();
+        const scaleFactor = size / box.getSize(new THREE.Vector3()).length();
         planet.scale.set(scaleFactor, scaleFactor, scaleFactor);
 
         scene.add(planet);
@@ -134,11 +110,9 @@ function loadPlanetAsync(loaderInstance, scene, name, modelPath, position, size)
 }
 
 /**
- * Loads all planet models (including the Sun) into the scene.
- * Earth is loaded first (to help frame the scene), then the Sun is created,
+ * Loads all planet models into the scene.
+ * Earth is loaded first, then the Sun is created,
  * and the remaining planets load concurrently.
- *
- * @param {THREE.Scene} scene - The scene to populate.
  */
 export async function loadPlanets(scene) {
   sceneRef = scene;
@@ -241,25 +215,19 @@ export async function loadPlanets(scene) {
   } catch (error) {
     console.error("Error loading planets:", error);
   }
-  // Start the animation loop.
-  animateScene();
 }
 
 /**
- * Adjusts the camera position and OrbitControls zoom limits based on the furthest planet.
- *
- * @param {THREE.PerspectiveCamera} camera - The camera to adjust.
- * @param {OrbitControls} controls - The OrbitControls instance to update.
+ * Adjusts the camera and OrbitControls based on the furthest planet.
  */
 export function updateZoomSettings(camera, controls) {
-  const maxDistance = planetData.neptune.distance + 5000000; // Extra buffer
+  const maxDistance = planetData.neptune.distance + 5000000;
   camera.position.z = Math.max(maxDistance * 2, 100000);
-  controls.updateZoomLimits("sun"); // Assuming OrbitControls has this custom method
+  controls.update();
 }
 
 /**
- * The unified animation loop for rotating planets, updating comparisons,
- * and animating the Moon's orbit around the Earth.
+ * Animation loop for rotating planets and updating the Moon's orbit.
  */
 function animateScene() {
   requestAnimationFrame(animateScene);
@@ -283,14 +251,6 @@ function animateScene() {
 
 /**
  * Animates the camera to focus on a specified planet.
- * Adjusts OrbitControls limits and triggers UI events accordingly.
- *
- * @param {string} planetName - Name of the target planet.
- * @param {THREE.PerspectiveCamera} camera - The camera to animate.
- * @param {OrbitControls} controls - The OrbitControls instance.
- * @param {THREE.Scene} scene - The scene containing the planet.
- * @param {boolean} isOrbitModeActive - Whether Orbit Mode is active.
- * @returns {Promise} Resolves when the camera animation completes.
  */
 export function moveToPlanet(planetName, camera, controls, scene, isOrbitModeActive) {
   return new Promise((resolve, reject) => {
@@ -300,45 +260,38 @@ export function moveToPlanet(planetName, camera, controls, scene, isOrbitModeAct
       return reject(new Error(`Planet "${planetName}" not found!`));
     }
     console.log(`🚀 Moving to: ${planetName}`);
-
-    if (isOrbitModeActive) {
-  moonOrbitPaused = true;
-} else {
-  moonOrbitPaused = (planetName.toLowerCase() !== "earth");
-}
-
-
-    // Compute the planet's bounding sphere for framing.
+    moonOrbitPaused = isOrbitModeActive ? true : (planetName.toLowerCase() !== "earth");
     const boundingBox = new THREE.Box3().setFromObject(targetPlanet);
     const boundingSphere = boundingBox.getBoundingSphere(new THREE.Sphere());
     const targetFocus = boundingSphere.center;
     const planetRadius = boundingSphere.radius;
-
-    // Determine target distance and camera offset.
     const defaultZoomMultiplier = 3;
     const targetDistance = Math.max(planetRadius * defaultZoomMultiplier, 1000);
     const cameraOffset = planetRadius * 0.5;
-
-    // Dynamically update OrbitControls zoom limits.
+    const direction = new THREE.Vector3().subVectors(targetFocus, camera.position).normalize();
+    const raycaster = new THREE.Raycaster(camera.position, direction);
+    const planetArray = Object.values(planets);
+    const intersections = raycaster.intersectObjects(planetArray, true);
+    let safeTarget = targetFocus.clone();
+    if (intersections.length > 0) {
+      for (let inter of intersections) {
+        if (inter.object.name !== planetName.toLowerCase()) {
+          safeTarget = inter.point.clone().add(direction.clone().multiplyScalar(-100));
+          break;
+        }
+      }
+    }
     controls.minDistance = targetDistance * 0.5;
     controls.maxDistance = targetDistance * 2;
-    console.log(
-      `🔍 Updated zoom limits for ${planetName}: Min ${controls.minDistance}, Max ${controls.maxDistance}`
-    );
-
-    // Define the target camera position (above and behind the planet).
+    console.log(`🔍 Updated zoom limits for ${planetName}: Min ${controls.minDistance}, Max ${controls.maxDistance}`);
     const targetPosition = new THREE.Vector3(
-      targetFocus.x,
-      targetFocus.y + cameraOffset,
-      targetFocus.z + targetDistance
+      safeTarget.x,
+      safeTarget.y + cameraOffset,
+      safeTarget.z + targetDistance
     );
-
-    // Disable controls during the transition and hide planet info.
     controls.enabled = false;
     let uiShown = false;
     hidePlanetInfo();
-
-    // Animate the camera position.
     gsap.to(camera.position, {
       x: targetPosition.x,
       y: targetPosition.y,
@@ -356,12 +309,10 @@ export function moveToPlanet(planetName, camera, controls, scene, isOrbitModeAct
         resolve();
       }
     });
-
-    // Smoothly update the OrbitControls target.
     gsap.to(controls.target, {
-      x: targetFocus.x,
-      y: targetFocus.y,
-      z: targetFocus.z,
+      x: safeTarget.x,
+      y: safeTarget.y,
+      z: safeTarget.z,
       duration: 2,
       ease: "power2.out"
     });

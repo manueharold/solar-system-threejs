@@ -42,12 +42,15 @@ let sceneRef = null;
 let moonOrbitPaused = false;
 let moonOrbitAngle = 0;
 let lastFrameTime = Date.now();
-let orbitsEnabled = true;           // (Not used explicitly, but available if needed)
+let orbitsEnabled = true;           // (Available if needed)
 
 THREE.Cache.enabled = true;
 
 // ===== Loader Setup =====
+
+// Reuse a single TextureLoader for all textures.
 const textureLoader = new THREE.TextureLoader();
+
 const dracoLoader = new DRACOLoader();
 dracoLoader.setDecoderPath("https://cdn.jsdelivr.net/npm/three@0.157.0/examples/jsm/libs/draco/");
 dracoLoader.preload();
@@ -66,7 +69,6 @@ loader.setDRACOLoader(dracoLoader);
  */
 function createRealisticSun(scene, position, size) {
   const geometry = new THREE.SphereGeometry(1, 64, 64);
-  const textureLoader = new THREE.TextureLoader();
   const sunTexture = textureLoader.load("./textures/8k_sun.jpg");
   const material = new THREE.MeshBasicMaterial({
     map: sunTexture,
@@ -95,7 +97,7 @@ function createRealisticSun(scene, position, size) {
  * Loads a GLTF planet model using the provided loader, scales it, and adds it to the scene.
  * The loaded planet is stored in the global planets and planetTemplates objects.
  *
- * @param {GLTFLoader} loaderInstance - The GLTFLoader to use (with manager if needed).
+ * @param {GLTFLoader} loaderInstance - The GLTFLoader to use.
  * @param {THREE.Scene} scene - The scene to add the planet.
  * @param {string} name - The planet's name.
  * @param {string} modelPath - URL/path to the GLTF model.
@@ -114,8 +116,7 @@ function loadPlanetAsync(loaderInstance, scene, name, modelPath, position, size)
 
         // Compute a scale factor based on the planet's bounding box size
         const box = new THREE.Box3().setFromObject(planet);
-        const scaleFactor =
-          size / box.getSize(new THREE.Vector3()).length();
+        const scaleFactor = size / box.getSize(new THREE.Vector3()).length();
         planet.scale.set(scaleFactor, scaleFactor, scaleFactor);
 
         scene.add(planet);
@@ -124,6 +125,7 @@ function loadPlanetAsync(loaderInstance, scene, name, modelPath, position, size)
         console.log(`✅ Loaded: ${planet.name}`);
         resolve(planet);
       },
+      // Optionally update progress (if needed)
       undefined,
       (error) => {
         console.error(`❌ Failed to load ${name}:`, error);
@@ -142,12 +144,13 @@ function loadPlanetAsync(loaderInstance, scene, name, modelPath, position, size)
  */
 export async function loadPlanets(scene) {
   sceneRef = scene;
-  planets = {};
+  planets = {}; // Reset stored planets
 
-  // Set up a LoadingManager for progress tracking.
+  // Set up a LoadingManager for progress/error tracking.
   const manager = new THREE.LoadingManager();
   manager.onStart = (url, itemsLoaded, itemsTotal) =>
     console.log(`Started loading: ${url} (${itemsLoaded}/${itemsTotal})`);
+  // Update the loading bar progress based on items loaded
   manager.onProgress = (url, itemsLoaded, itemsTotal) => {
     const progressPercentage = (itemsLoaded / itemsTotal) * 100;
     const loadingBarProgress = document.getElementById("loadingBarProgress");
@@ -159,8 +162,11 @@ export async function loadPlanets(scene) {
   manager.onError = (url) =>
     console.error(`There was an error loading ${url}`);
 
+  // Create a new loader using the manager.
   const loaderWithManager = new GLTFLoader(manager);
   loaderWithManager.setDRACOLoader(dracoLoader);
+
+  // Helper to load a planet using the loader with manager.
   const loadPlanet = (name, modelPath, position, size) =>
     loadPlanetAsync(loaderWithManager, scene, name, modelPath, position, size);
 
@@ -179,13 +185,13 @@ export async function loadPlanets(scene) {
       loadingContainer.style.display = "none";
     }
 
-    // Start the animation loop immediately so Earth rotates.
+    // Start the animation loop immediately so Earth starts rotating.
     animateScene();
 
     // 2. Create the Sun as soon as Earth is loaded.
     createRealisticSun(scene, [planetData.sun.distance, 0, 0], planetData.sun.scale);
 
-    // 3. Load the remaining planets concurrently.
+    // 3. Load the remaining planets concurrently in the background.
     Promise.all([
       loadPlanet(
         "mercury",
@@ -241,8 +247,6 @@ export async function loadPlanets(scene) {
   } catch (error) {
     console.error("Error loading planets:", error);
   }
-  // Start the animation loop.
-  animateScene();
 }
 
 /**
@@ -254,7 +258,7 @@ export async function loadPlanets(scene) {
 export function updateZoomSettings(camera, controls) {
   const maxDistance = planetData.neptune.distance + 5000000; // Extra buffer
   camera.position.z = Math.max(maxDistance * 2, 100000);
-  controls.updateZoomLimits("sun"); // Assuming OrbitControls has this custom method
+  controls.update();
 }
 
 /**
@@ -263,16 +267,24 @@ export function updateZoomSettings(camera, controls) {
  */
 function animateScene() {
   requestAnimationFrame(animateScene);
+
+  // Rotate all planets (skip Moon if its orbit is paused).
   for (const planetName in planets) {
     const planet = planets[planetName];
     if (rotationSpeeds[planetName] && (planetName !== "moon" || !moonOrbitPaused)) {
       planet.rotation.y += rotationSpeeds[planetName];
     }
   }
+
+  // Update any active planet comparisons.
   updateComparisonRotation();
+
+  // Calculate time delta for smooth animation.
   const currentTime = Date.now();
   const deltaTime = (currentTime - lastFrameTime) * 0.0005;
   lastFrameTime = currentTime;
+
+  // Orbit the Moon around the Earth if not paused.
   if (!moonOrbitPaused && planets["moon"] && planets["earth"]) {
     moonOrbitAngle += deltaTime;
     const moonDistance = planetData.moon.distance;
@@ -284,6 +296,8 @@ function animateScene() {
 /**
  * Animates the camera to focus on a specified planet.
  * Adjusts OrbitControls limits and triggers UI events accordingly.
+ * The movement is “safe” in that it raycasts from the current camera
+ * position to the target and stops short if an intersection is found.
  *
  * @param {string} planetName - Name of the target planet.
  * @param {THREE.PerspectiveCamera} camera - The camera to animate.
@@ -301,12 +315,12 @@ export function moveToPlanet(planetName, camera, controls, scene, isOrbitModeAct
     }
     console.log(`🚀 Moving to: ${planetName}`);
 
+    // Pause the Moon orbit if in Orbit Mode or when not moving to Earth.
     if (isOrbitModeActive) {
-  moonOrbitPaused = true;
-} else {
-  moonOrbitPaused = (planetName.toLowerCase() !== "earth");
-}
-
+      moonOrbitPaused = true;
+    } else {
+      moonOrbitPaused = (planetName.toLowerCase() !== "earth");
+    }
 
     // Compute the planet's bounding sphere for framing.
     const boundingBox = new THREE.Box3().setFromObject(targetPlanet);
@@ -319,18 +333,31 @@ export function moveToPlanet(planetName, camera, controls, scene, isOrbitModeAct
     const targetDistance = Math.max(planetRadius * defaultZoomMultiplier, 1000);
     const cameraOffset = planetRadius * 0.5;
 
+    // Optimize movement: use raycasting to compute a safe target that avoids collisions.
+    const direction = new THREE.Vector3().subVectors(targetFocus, camera.position).normalize();
+    const raycaster = new THREE.Raycaster(camera.position, direction);
+    const planetArray = Object.values(planets);
+    const intersections = raycaster.intersectObjects(planetArray, true);
+    let safeTarget = targetFocus.clone();
+    if (intersections.length > 0) {
+      for (let inter of intersections) {
+        if (inter.object.name !== planetName.toLowerCase()) {
+          safeTarget = inter.point.clone().add(direction.clone().multiplyScalar(-100));
+          break;
+        }
+      }
+    }
+
     // Dynamically update OrbitControls zoom limits.
     controls.minDistance = targetDistance * 0.5;
     controls.maxDistance = targetDistance * 2;
-    console.log(
-      `🔍 Updated zoom limits for ${planetName}: Min ${controls.minDistance}, Max ${controls.maxDistance}`
-    );
+    console.log(`🔍 Updated zoom limits for ${planetName}: Min ${controls.minDistance}, Max ${controls.maxDistance}`);
 
-    // Define the target camera position (above and behind the planet).
+    // Define the target camera position (above and behind the safe target).
     const targetPosition = new THREE.Vector3(
-      targetFocus.x,
-      targetFocus.y + cameraOffset,
-      targetFocus.z + targetDistance
+      safeTarget.x,
+      safeTarget.y + cameraOffset,
+      safeTarget.z + targetDistance
     );
 
     // Disable controls during the transition and hide planet info.
@@ -338,7 +365,6 @@ export function moveToPlanet(planetName, camera, controls, scene, isOrbitModeAct
     let uiShown = false;
     hidePlanetInfo();
 
-    // Animate the camera position.
     gsap.to(camera.position, {
       x: targetPosition.x,
       y: targetPosition.y,
@@ -357,11 +383,10 @@ export function moveToPlanet(planetName, camera, controls, scene, isOrbitModeAct
       }
     });
 
-    // Smoothly update the OrbitControls target.
     gsap.to(controls.target, {
-      x: targetFocus.x,
-      y: targetFocus.y,
-      z: targetFocus.z,
+      x: safeTarget.x,
+      y: safeTarget.y,
+      z: safeTarget.z,
       duration: 2,
       ease: "power2.out"
     });
@@ -369,7 +394,8 @@ export function moveToPlanet(planetName, camera, controls, scene, isOrbitModeAct
 }
 
 /**
- * A secondary update function for manual planet rotation updates.
+ * A secondary update function that rotates planets and updates the Moon's orbit.
+ * (This can be called externally if a manual update is desired.)
  */
 export function updatePlanets() {
   for (const planetName in planets) {

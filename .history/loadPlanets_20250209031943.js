@@ -263,21 +263,31 @@ export function updateZoomSettings(camera, controls) {
  */
 function animateScene() {
   requestAnimationFrame(animateScene);
+
+  // Rotate all planets (skip Moon if its orbit is paused).
   for (const planetName in planets) {
     const planet = planets[planetName];
     if (rotationSpeeds[planetName] && (planetName !== "moon" || !moonOrbitPaused)) {
       planet.rotation.y += rotationSpeeds[planetName];
     }
   }
+
+  // Update any active planet comparisons.
   updateComparisonRotation();
+
+  // Calculate time delta for smooth animation.
   const currentTime = Date.now();
   const deltaTime = (currentTime - lastFrameTime) * 0.0005;
   lastFrameTime = currentTime;
+
+  // Orbit the Moon around the Earth if not paused.
   if (!moonOrbitPaused && planets["moon"] && planets["earth"]) {
     moonOrbitAngle += deltaTime;
     const moonDistance = planetData.moon.distance;
-    planets["moon"].position.x = planets["earth"].position.x + Math.cos(moonOrbitAngle) * moonDistance;
-    planets["moon"].position.z = planets["earth"].position.z + Math.sin(moonOrbitAngle) * moonDistance;
+    planets["moon"].position.x =
+      planets["earth"].position.x + Math.cos(moonOrbitAngle) * moonDistance;
+    planets["moon"].position.z =
+      planets["earth"].position.z + Math.sin(moonOrbitAngle) * moonDistance;
   }
 }
 
