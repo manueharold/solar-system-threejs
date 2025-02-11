@@ -4,20 +4,20 @@ import gsap from "https://cdn.skypack.dev/gsap";
 import * as THREE from "https://cdn.skypack.dev/three@0.129.0/build/three.module.js";
 import { rotationSpeeds, planetTemplates } from "./loadPlanets.js";
 
-// Define zoom limits for the camera.
-<<<<<<< HEAD
- const MIN_ZOOM = 5000;   // Minimum zoom distance (adjust as needed)
- const MAX_ZOOM = 30000;  // Maximum zoom distance (adjust as needed)
-=======
-const MIN_ZOOM = 5000;   // Minimum zoom distance (adjust as needed)
-const MAX_ZOOM = 20000;  // Maximum zoom distance (adjust as needed)
->>>>>>> 2c77f23 (Fixed default view when in Orbit Mode and Default Mode)
+// (The previous constants are no longer used globally. Zoom limits will be set dynamically.)
+//
+// const MIN_ZOOM = 5000;   // For special planets
+// const MAX_ZOOM = 10000;  // For special planets
+//
+// For other planets, the limits will be 2000 and 8000.
 
-// Object to store the currently compared planet objects.
 const currentComparison = {
   leftObject: null,
   rightObject: null,
 };
+
+// Define the list of special planets.
+const specialPlanets = ["sun", "saturn", "jupiter", "uranus", "neptune"];
 
 /**
  * Helper to determine if Orbit Mode is active.
@@ -30,7 +30,7 @@ function isOrbitModeActive() {
 
 /**
  * Returns a planet instance for comparison.
- * For the Sun, use the original instance (without cloning) and reduce its scale.
+ * For the Sun and the listed special planets, use the original instance (without cloning) and reduce its scale.
  * For all other planets, clone the template and deep-clone materials for maximum quality.
  *
  * @param {string} name - The planet name.
@@ -43,7 +43,7 @@ function getPlanetInstance(name) {
     console.error(`Template for "${name}" not found.`);
     return null;
   }
-  if (lowerName === "sun", "saturn", "jupiter", "uranus", "neptune") {
+  if (specialPlanets.includes(lowerName)) {
     // Scale it down by 0.05 only once.
     if (!template.userData.comparisonScaled) {
       template.scale.multiplyScalar(0.05);
@@ -127,6 +127,7 @@ function animateIn(planet, side, targetPos, onComplete) {
 
 /**
  * Lays out the two compared planets side by side and adjusts the camera.
+ * The zoom limits are chosen based on whether either planet is one of the special ones.
  * @param {THREE.Scene} scene - The Three.js scene.
  * @param {THREE.Camera} camera - The camera to reposition.
  * @param {Object} controls - Camera controls to update.
@@ -155,15 +156,29 @@ function performComparisonLayout(scene, camera, controls) {
   animateIn(currentComparison.leftObject, "left", targetPosLeft, () => {});
   animateIn(currentComparison.rightObject, "right", targetPosRight, () => {});
 
+  // Set zoom limits based on the planet names.
+  // If either planet is special, use larger zoom limits.
+  let minZoom, maxZoom;
+  if (
+    specialPlanets.includes(currentComparison.leftObject.name.toLowerCase()) ||
+    specialPlanets.includes(currentComparison.rightObject.name.toLowerCase())
+  ) {
+    minZoom = 5000;
+    maxZoom = 10000;
+  } else {
+    minZoom = 2000;
+    maxZoom = 8000;
+  }
+
   // Adjust the camera to ensure both planets are in view.
   let cameraDistance = separation + Math.max(sphereLeft.radius, sphereRight.radius) * 8;
   // Clamp the camera distance within our zoom limits.
-  cameraDistance = Math.max(MIN_ZOOM, Math.min(cameraDistance, MAX_ZOOM));
+  cameraDistance = Math.max(minZoom, Math.min(cameraDistance, maxZoom));
   const targetCameraPos = new THREE.Vector3(center.x, center.y, center.z + cameraDistance);
 
   // Set zoom limits on the controls.
-  controls.minDistance = MIN_ZOOM;
-  controls.maxDistance = MAX_ZOOM;
+  controls.minDistance = minZoom;
+  controls.maxDistance = maxZoom;
 
   controls.enabled = false;
   gsap.to(camera.position, {
@@ -269,7 +284,6 @@ export function updateComparisonRotation() {
     currentComparison.rightObject.rotation.y += speed;
   }
 }
-
 
 /**
  * Makes all planet meshes in the scene visible.

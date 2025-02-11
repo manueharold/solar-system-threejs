@@ -5,13 +5,8 @@ import * as THREE from "https://cdn.skypack.dev/three@0.129.0/build/three.module
 import { rotationSpeeds, planetTemplates } from "./loadPlanets.js";
 
 // Define zoom limits for the camera.
-<<<<<<< HEAD
- const MIN_ZOOM = 5000;   // Minimum zoom distance (adjust as needed)
- const MAX_ZOOM = 30000;  // Maximum zoom distance (adjust as needed)
-=======
 const MIN_ZOOM = 5000;   // Minimum zoom distance (adjust as needed)
-const MAX_ZOOM = 20000;  // Maximum zoom distance (adjust as needed)
->>>>>>> 2c77f23 (Fixed default view when in Orbit Mode and Default Mode)
+const MAX_ZOOM = 100000;  // Maximum zoom distance (adjust as needed)
 
 // Object to store the currently compared planet objects.
 const currentComparison = {
@@ -31,7 +26,9 @@ function isOrbitModeActive() {
 /**
  * Returns a planet instance for comparison.
  * For the Sun, use the original instance (without cloning) and reduce its scale.
- * For all other planets, clone the template and deep-clone materials for maximum quality.
+ * For all other planets, clone the template and deep‑clone materials for maximum quality.
+ *
+ * Additionally, store the original position in userData.originalPosition (if not already set).
  *
  * @param {string} name - The planet name.
  * @returns {THREE.Object3D|null} The planet object for comparison, or null if not found.
@@ -43,23 +40,35 @@ function getPlanetInstance(name) {
     console.error(`Template for "${name}" not found.`);
     return null;
   }
-  if (lowerName === "sun", "saturn", "jupiter", "uranus", "neptune") {
+  if (lowerName === "sun") {
+    // Do not clone the Sun; use it directly.
     // Scale it down by 0.05 only once.
     if (!template.userData.comparisonScaled) {
       template.scale.multiplyScalar(0.05);
       template.userData.comparisonScaled = true;
+    }
+    // Save the original position if it isn’t already stored.
+    if (!template.userData.originalPosition) {
+      template.userData.originalPosition = template.position.clone();
     }
     return template;
   } else {
     // For other planets, clone the template.
     const instance = template.clone(true);
     instance.name = lowerName;
-    // Ensure all child meshes have a name and clone materials for high quality.
+    // Save the original position.
+    if (!instance.userData.originalPosition) {
+      instance.userData.originalPosition = instance.position.clone();
+    }
+    // Ensure all child meshes have a name, clone their materials, and save their original positions.
     instance.traverse((child) => {
       if (child.isMesh) {
         if (!child.name) child.name = lowerName;
         if (child.material) {
           child.material = child.material.clone();
+        }
+        if (!child.userData.originalPosition) {
+          child.userData.originalPosition = child.position.clone();
         }
       }
     });
@@ -207,9 +216,21 @@ export function comparePlanets(planet1, planet2, scene, camera, controls) {
       removals.push(
         new Promise((resolve) => {
           animateOut(currentComparison.leftObject, "left", () => {
-            scene.remove(currentComparison.leftObject);
+            // For planets other than the Sun, remove them from the scene.
+            // For the Sun, animate back to its original position.
+            if (currentComparison.leftObject.name !== "sun") {
+              scene.remove(currentComparison.leftObject);
+            } else if (currentComparison.leftObject.userData.originalPosition) {
+              gsap.to(currentComparison.leftObject.position, {
+                x: currentComparison.leftObject.userData.originalPosition.x,
+                y: currentComparison.leftObject.userData.originalPosition.y,
+                z: currentComparison.leftObject.userData.originalPosition.z,
+                duration: 1,
+                ease: "power2.out",
+              });
+            }
             resolve();
-          });
+          })
         })
       );
     }
@@ -217,9 +238,19 @@ export function comparePlanets(planet1, planet2, scene, camera, controls) {
       removals.push(
         new Promise((resolve) => {
           animateOut(currentComparison.rightObject, "right", () => {
-            scene.remove(currentComparison.rightObject);
+            if (currentComparison.rightObject.name !== "sun") {
+              scene.remove(currentComparison.rightObject);
+            } else if (currentComparison.rightObject.userData.originalPosition) {
+              gsap.to(currentComparison.rightObject.position, {
+                x: currentComparison.rightObject.userData.originalPosition.x,
+                y: currentComparison.rightObject.userData.originalPosition.y,
+                z: currentComparison.rightObject.userData.originalPosition.z,
+                duration: 1,
+                ease: "power2.out",
+              });
+            }
             resolve();
-          });
+          })
         })
       );
     }
@@ -270,7 +301,6 @@ export function updateComparisonRotation() {
   }
 }
 
-
 /**
  * Makes all planet meshes in the scene visible.
  * @param {THREE.Scene} scene - The Three.js scene.
@@ -292,6 +322,21 @@ export function hideNonComparedPlanets(scene, comparedPlanets) {
   scene.traverse((object) => {
     if (object.isMesh && object.userData.isPlanet) {
       object.visible = comparedPlanets.includes(object.name);
+    }
+  });
+}
+
+/**
+ * Resets the positions of all planet objects in the scene to their original positions.
+ * This should be called after comparing so that subsequent searches (for example,
+ * searching for "Sun") use the original solar system layout.
+ *
+ * @param {THREE.Scene} scene - The Three.js scene.
+ */
+export function resetAllPlanetsPositions(scene) {
+  scene.traverse((object) => {
+    if (object.userData.isPlanet && object.userData.originalPosition) {
+      object.position.copy(object.userData.originalPosition);
     }
   });
 }

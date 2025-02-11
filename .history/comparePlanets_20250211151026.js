@@ -1,17 +1,6 @@
-// comparePlanets.js
-
 import gsap from "https://cdn.skypack.dev/gsap";
 import * as THREE from "https://cdn.skypack.dev/three@0.129.0/build/three.module.js";
 import { rotationSpeeds, planetTemplates } from "./loadPlanets.js";
-
-// Define zoom limits for the camera.
-<<<<<<< HEAD
- const MIN_ZOOM = 5000;   // Minimum zoom distance (adjust as needed)
- const MAX_ZOOM = 30000;  // Maximum zoom distance (adjust as needed)
-=======
-const MIN_ZOOM = 5000;   // Minimum zoom distance (adjust as needed)
-const MAX_ZOOM = 20000;  // Maximum zoom distance (adjust as needed)
->>>>>>> 2c77f23 (Fixed default view when in Orbit Mode and Default Mode)
 
 // Object to store the currently compared planet objects.
 const currentComparison = {
@@ -31,7 +20,7 @@ function isOrbitModeActive() {
 /**
  * Returns a planet instance for comparison.
  * For the Sun, use the original instance (without cloning) and reduce its scale.
- * For all other planets, clone the template and deep-clone materials for maximum quality.
+ * For all other planets, clone the template.
  *
  * @param {string} name - The planet name.
  * @returns {THREE.Object3D|null} The planet object for comparison, or null if not found.
@@ -40,10 +29,11 @@ function getPlanetInstance(name) {
   const lowerName = name.toLowerCase();
   const template = planetTemplates[lowerName];
   if (!template) {
-    console.error(`Template for "${name}" not found.`);
+    console.error(Template for "${name}" not found.);
     return null;
   }
-  if (lowerName === "sun", "saturn", "jupiter", "uranus", "neptune") {
+  if (lowerName === "sun") {
+    // Do not clone the Sun; use it directly.
     // Scale it down by 0.05 only once.
     if (!template.userData.comparisonScaled) {
       template.scale.multiplyScalar(0.05);
@@ -54,14 +44,9 @@ function getPlanetInstance(name) {
     // For other planets, clone the template.
     const instance = template.clone(true);
     instance.name = lowerName;
-    // Ensure all child meshes have a name and clone materials for high quality.
+    // Ensure all child meshes have a name.
     instance.traverse((child) => {
-      if (child.isMesh) {
-        if (!child.name) child.name = lowerName;
-        if (child.material) {
-          child.material = child.material.clone();
-        }
-      }
+      if (child.isMesh && !child.name) child.name = lowerName;
     });
     return instance;
   }
@@ -156,14 +141,8 @@ function performComparisonLayout(scene, camera, controls) {
   animateIn(currentComparison.rightObject, "right", targetPosRight, () => {});
 
   // Adjust the camera to ensure both planets are in view.
-  let cameraDistance = separation + Math.max(sphereLeft.radius, sphereRight.radius) * 8;
-  // Clamp the camera distance within our zoom limits.
-  cameraDistance = Math.max(MIN_ZOOM, Math.min(cameraDistance, MAX_ZOOM));
+  const cameraDistance = separation + Math.max(sphereLeft.radius, sphereRight.radius) * 8;
   const targetCameraPos = new THREE.Vector3(center.x, center.y, center.z + cameraDistance);
-
-  // Set zoom limits on the controls.
-  controls.minDistance = MIN_ZOOM;
-  controls.maxDistance = MAX_ZOOM;
 
   controls.enabled = false;
   gsap.to(camera.position, {
@@ -246,6 +225,7 @@ export function comparePlanets(planet1, planet2, scene, camera, controls) {
       sunsToRemove.forEach((obj) => scene.remove(obj));
     }
     
+    
     // Add the compared objects to the scene.
     scene.add(currentComparison.leftObject, currentComparison.rightObject);
     performComparisonLayout(scene, camera, controls);
@@ -259,17 +239,16 @@ export function comparePlanets(planet1, planet2, scene, camera, controls) {
 export function updateComparisonRotation() {
   if (isOrbitModeActive()) return;
   
-  if (currentComparison.leftObject && currentComparison.leftObject.name !== "sun") {
+  if (currentComparison.leftObject) {
     const speed = rotationSpeeds[currentComparison.leftObject.name] || 0.002;
     currentComparison.leftObject.rotation.y += speed;
   }
   
-  if (currentComparison.rightObject && currentComparison.rightObject.name !== "sun") {
+  if (currentComparison.rightObject) {
     const speed = rotationSpeeds[currentComparison.rightObject.name] || 0.002;
     currentComparison.rightObject.rotation.y += speed;
   }
 }
-
 
 /**
  * Makes all planet meshes in the scene visible.

@@ -22,20 +22,17 @@ export const planetData = {
   moon:    { size: 3474,   distance: 38000,     scale: 0.2 } // Relative to Earth
 };
 
-const simulationEarthRotationSpeed = 2 * Math.PI / 3600; // ~0.001745 radians per frame
-
-// Now define each planet's rotation speed relative to Earth’s rotation period.
-// The denominators below represent the planet's sidereal rotation period in Earth days.
-// (For Venus we use a negative value to simulate its retrograde rotation.)
+// Base rotation speed and per-planet factors
+const baseRotationSpeed = 0.002;
 export const rotationSpeeds = {
-  mercury: simulationEarthRotationSpeed / 58.646,   // Mercury rotates very slowly (≈58.65 Earth days per rotation)
-  venus:   -simulationEarthRotationSpeed / 243,      // Venus rotates retrograde (~243 Earth days per rotation)
-  earth:   simulationEarthRotationSpeed,             // Earth rotates once every 60 seconds in our simulation
-  mars:    simulationEarthRotationSpeed / 1.03,        // Mars rotates roughly every 24.6 hours (~1.03 Earth days)
-  jupiter: simulationEarthRotationSpeed / 0.41,        // Jupiter rotates very fast (~9.9 hours per rotation)
-  saturn:  simulationEarthRotationSpeed / 0.45,        // Saturn rotates in about 10.7 hours
-  uranus:  simulationEarthRotationSpeed / 0.72,        // Uranus rotates in about 17.2 hours
-  neptune: simulationEarthRotationSpeed / 0.67         // Neptune rotates in about 16.1 hours
+  mercury: baseRotationSpeed / 58.6,
+  venus: baseRotationSpeed / 243,
+  earth: baseRotationSpeed / 1,
+  mars: baseRotationSpeed / 1.03,
+  jupiter: baseRotationSpeed / 0.41,
+  saturn: baseRotationSpeed / 0.45,
+  uranus: baseRotationSpeed / 0.72,
+  neptune: baseRotationSpeed / 0.67 
 };
 
 // ===== Global Variables =====
@@ -90,7 +87,7 @@ function createRealisticSun(scene, position, size) {
   // Store the Sun mesh for later use (e.g., comparisons)
   planets["sun"] = sunMesh;
   planetTemplates["sun"] = sunMesh.clone(true);
-  console.log(`✅ Created realistic Sun at [${position}]`);
+  console.log(✅ Created realistic Sun at [${position}]);
   return sunMesh;
 }
 
@@ -124,12 +121,12 @@ function loadPlanetAsync(loaderInstance, scene, name, modelPath, position, size)
         scene.add(planet);
         planets[planet.name] = planet;
         planetTemplates[planet.name] = planet.clone(true);
-        console.log(`✅ Loaded: ${planet.name}`);
+        console.log(✅ Loaded: ${planet.name});
         resolve(planet);
       },
       undefined,
       (error) => {
-        console.error(`❌ Failed to load ${name}:`, error);
+        console.error(❌ Failed to load ${name}:, error);
         reject(error);
       }
     );
@@ -150,17 +147,17 @@ export async function loadPlanets(scene) {
   // Set up a LoadingManager for progress tracking.
   const manager = new THREE.LoadingManager();
   manager.onStart = (url, itemsLoaded, itemsTotal) =>
-    console.log(`Started loading: ${url} (${itemsLoaded}/${itemsTotal})`);
+    console.log(Started loading: ${url} (${itemsLoaded}/${itemsTotal}));
   manager.onProgress = (url, itemsLoaded, itemsTotal) => {
     const progressPercentage = (itemsLoaded / itemsTotal) * 100;
     const loadingBarProgress = document.getElementById("loadingBarProgress");
     if (loadingBarProgress) {
-      loadingBarProgress.style.width = `${progressPercentage}%`;
+      loadingBarProgress.style.width = ${progressPercentage}%;
     }
   };
   manager.onLoad = () => console.log("All assets loaded");
   manager.onError = (url) =>
-    console.error(`There was an error loading ${url}`);
+    console.error(There was an error loading ${url});
 
   const loaderWithManager = new GLTFLoader(manager);
   loaderWithManager.setDRACOLoader(dracoLoader);
@@ -300,10 +297,10 @@ export function moveToPlanet(planetName, camera, controls, scene, isOrbitModeAct
     const nameLower = planetName.toLowerCase();
     const targetPlanet = scene.getObjectByName(nameLower);
     if (!targetPlanet) {
-      console.error(`Planet "${planetName}" not found in scene!`);
-      return reject(new Error(`Planet "${planetName}" not found in scene!`));
+      console.error(❌ Planet "${planetName}" not found in scene!);
+      return reject(new Error(Planet "${planetName}" not found in scene!));
     }
-    console.log(`🚀 Moving to: ${planetName}`);
+    console.log(🚀 Moving to: ${planetName});
 
     // Pause the Moon’s orbit if we're not focusing on Earth (or if in Orbit Mode).
     // (Assumes moonOrbitPaused is defined elsewhere as a global or imported variable.)

@@ -2,16 +2,11 @@
 
 import gsap from "https://cdn.skypack.dev/gsap";
 import * as THREE from "https://cdn.skypack.dev/three@0.129.0/build/three.module.js";
-import { rotationSpeeds, planetTemplates } from "./loadPlanets.js";
+import { rotationSpeeds, planetTemplates, planetData } from "./loadPlanets.js";
 
 // Define zoom limits for the camera.
-<<<<<<< HEAD
- const MIN_ZOOM = 5000;   // Minimum zoom distance (adjust as needed)
- const MAX_ZOOM = 30000;  // Maximum zoom distance (adjust as needed)
-=======
 const MIN_ZOOM = 5000;   // Minimum zoom distance (adjust as needed)
-const MAX_ZOOM = 20000;  // Maximum zoom distance (adjust as needed)
->>>>>>> 2c77f23 (Fixed default view when in Orbit Mode and Default Mode)
+const MAX_ZOOM = 100000;  // Maximum zoom distance (adjust as needed)
 
 // Object to store the currently compared planet objects.
 const currentComparison = {
@@ -43,7 +38,8 @@ function getPlanetInstance(name) {
     console.error(`Template for "${name}" not found.`);
     return null;
   }
-  if (lowerName === "sun", "saturn", "jupiter", "uranus", "neptune") {
+  if (lowerName === "sun") {
+    // Do not clone the Sun; use it directly.
     // Scale it down by 0.05 only once.
     if (!template.userData.comparisonScaled) {
       template.scale.multiplyScalar(0.05);
@@ -252,6 +248,10 @@ export function comparePlanets(planet1, planet2, scene, camera, controls) {
   });
 }
 
+/**
+ * Continuously updates the rotation of the compared planets.
+ * This function is disabled if Orbit Mode is active.
+ */
 /**
  * Continuously updates the rotation of the compared planets.
  * This function is disabled if Orbit Mode is active.

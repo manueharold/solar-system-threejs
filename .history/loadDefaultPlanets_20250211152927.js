@@ -1,11 +1,8 @@
 import * as THREE from "https://cdn.skypack.dev/three@0.129.0/build/three.module.js";
 import gsap from "https://cdn.skypack.dev/gsap";
-import { loadPlanets, planetData, rotationSpeeds } from "./loadPlanets.js";
+import { loadPlanets, planetData } from "./loadPlanets.js";
 
 export async function loadDefaultPlanets(scene, camera, controls) {
-  // --- Reset Orbit Mode flag ---
-  window.orbitModeEnabled = false;
-
   // ----- Remove Orbit Mode Elements -----
   const orbitModeGroup = scene.getObjectByName("orbitModeGroup");
   if (orbitModeGroup) {
@@ -13,7 +10,6 @@ export async function loadDefaultPlanets(scene, camera, controls) {
     console.log("Removed orbit mode group.");
   }
 
-  // Remove any orbit-related lines (e.g., for orbits) from the scene.
   scene.traverse((child) => {
     if (
       (child.type === "Line" ||
@@ -67,55 +63,42 @@ export async function loadDefaultPlanets(scene, camera, controls) {
   await loadPlanets(scene);
   console.log("Default planets reloaded.");
 
-  // ----- Set Rotation Speeds on Each Planet -----
-  // For each planet whose name exists in the rotationSpeeds object,
-  // assign the rotation speed (in radians per frame) to its userData.
-  Object.keys(rotationSpeeds).forEach((planetName) => {
-    const planet = scene.getObjectByName(planetName);
-    if (planet) {
-      planet.userData.rotationSpeed = rotationSpeeds[planetName];
-      console.log(
-        `Set rotation speed for ${planetName} to ${rotationSpeeds[planetName]} rad per frame`
-      );
-    }
-  });
-
   // ----- Reset Earth's Transformation -----
-  const earth = scene.getObjectByName("earth");
-  if (earth) {
-    // Position Earth according to its configuration.
-    earth.position.set(planetData.earth.distance, 0, 0);
+  // Ensure Earth is at its default position and scale.
+  // Ensure Earth is at its default position and scale.
+const earth = scene.getObjectByName("earth");
+if (earth) {
+  // Set Earth’s position using your configuration data.
+  earth.position.set(planetData.earth.distance, 0, 0);
+  
+  // Reset rotation (if needed).
+  earth.rotation.set(0, 0, 0);
+  
+  // Increase Earth's scale (e.g., 2x its default size)
+  const scaleFactor = 10; // Adjust this to make Earth larger
+  earth.scale.set(
+    planetData.earth.scale * scaleFactor, 
+    planetData.earth.scale * scaleFactor, 
+    planetData.earth.scale * scaleFactor
+  );
 
-    // Reset Earth’s rotation.
-    earth.rotation.set(0, 0, 0);
+  earth.updateMatrixWorld(true);
+  console.log("Earth reset and resized:", earth.position, earth.scale);
+} else {
+  console.warn("Earth not found in scene.");
+}
 
-    // Optionally increase Earth's scale (here we make it 10x larger than its default scale).
-    const scaleFactor = 10;
-    earth.scale.set(
-      planetData.earth.scale * scaleFactor,
-      planetData.earth.scale * scaleFactor,
-      planetData.earth.scale * scaleFactor
-    );
-
-    earth.updateMatrixWorld(true);
-    console.log("Earth reset and resized:", earth.position, earth.scale);
-  } else {
-    console.warn("Earth not found in scene.");
-  }
 
   // ----- Set Camera to Default View -----
-  // Use Earth's position from the configuration.
+  // Use planetData.earth.distance for Earth's position.
   const earthPosition = new THREE.Vector3(planetData.earth.distance, 0, 0);
-  // Offset the camera so it is positioned above and behind Earth.
+  // These offset values match your initScene defaults.
   camera.position.set(earthPosition.x + 5000, 3000, earthPosition.z + 5000);
   camera.lookAt(earthPosition);
   console.log("Camera set to default view:", camera.position);
 
   if (controls) {
     controls.target.copy(earthPosition);
-    // Set the zoom limits (adjust as needed).
-    controls.minDistance = 3000;
-    controls.maxDistance = 50000;
     controls.update();
   }
 

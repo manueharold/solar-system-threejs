@@ -5,13 +5,8 @@ import * as THREE from "https://cdn.skypack.dev/three@0.129.0/build/three.module
 import { rotationSpeeds, planetTemplates } from "./loadPlanets.js";
 
 // Define zoom limits for the camera.
-<<<<<<< HEAD
- const MIN_ZOOM = 5000;   // Minimum zoom distance (adjust as needed)
- const MAX_ZOOM = 30000;  // Maximum zoom distance (adjust as needed)
-=======
 const MIN_ZOOM = 5000;   // Minimum zoom distance (adjust as needed)
-const MAX_ZOOM = 20000;  // Maximum zoom distance (adjust as needed)
->>>>>>> 2c77f23 (Fixed default view when in Orbit Mode and Default Mode)
+const MAX_ZOOM = 100000;  // Maximum zoom distance (adjust as needed)
 
 // Object to store the currently compared planet objects.
 const currentComparison = {
@@ -43,7 +38,8 @@ function getPlanetInstance(name) {
     console.error(`Template for "${name}" not found.`);
     return null;
   }
-  if (lowerName === "sun", "saturn", "jupiter", "uranus", "neptune") {
+  if (lowerName === "sun") {
+    // Do not clone the Sun; use it directly.
     // Scale it down by 0.05 only once.
     if (!template.userData.comparisonScaled) {
       template.scale.multiplyScalar(0.05);
@@ -88,16 +84,92 @@ function animateMaterials(planet, targetOpacity, duration, ease) {
  * @param {string} side - "left" or "right" (determines direction).
  * @param {Function} onComplete - Callback fired after the animation.
  */
-function animateOut(planet, side, onComplete) {
-  const offset = side === "left" ? -2000 : 2000;
-  gsap.to(planet.position, {
-    x: planet.position.x + offset,
+function animateOut(object, side, onComplete) {
+  gsap.to(object.scale, {
+    x: 0,
+    y: 0,
+    z: 0,
     duration: 1,
-    ease: "power2.in",
+    ease: 'power2.in',
+    onComplete: onComplete,
   });
-  animateMaterials(planet, 0, 1, "power2.in");
-  gsap.delayedCall(1, onComplete);
 }
+
+/**
+ * Resets the scene after a comparison:
+ * - Animates out and removes any compared planets.
+ * - Restores the default positions/visibility for all planets.
+ * - If a single planet is selected (via search), only that planet remains visible.
+ *
+ * @param {THREE.Scene} scene - The Three.js scene.
+ * @param {THREE.Camera} camera - The camera to adjust (if needed).
+ * @param {Object} controls - Camera controls to update (if needed).
+ * @param {string|null} selectedPlanet - The name of the planet that should remain visible.
+ */
+export function resetComparedPlanets(scene, camera, controls, selectedPlanet = null) {
+  // Animate out any compared planets and remove them from the scene.
+  const removals = [];
+  if (currentComparison.leftObject) {
+    removals.push(
+      new Promise((resolve) => {
+        animateOut(currentComparison.leftObject, 'left', () => {
+          scene.remove(currentComparison.leftObject);
+          resolve();
+        });
+      })
+    );
+  }
+  if (currentComparison.rightObject) {
+    removals.push(
+      new Promise((resolve) => {
+        animateOut(currentComparison.rightObject, 'right', () => {
+          scene.remove(currentComparison.rightObject);
+          resolve();
+        });
+      })
+    );
+  }
+  Promise.all(removals).then(() => {
+    currentComparison.leftObject = currentComparison.rightObject = null;
+
+    // Restore all planet visibility.
+    showAllPlanets(scene);
+
+    // If a single planet is selected, hide all others.
+    if (selectedPlanet) {
+      hideNonComparedPlanets(scene, [selectedPlanet.toLowerCase()]);
+    }
+
+    // Restore planet positions (if their original positions were stored)
+    scene.traverse((obj) => {
+      if (obj.isMesh && obj.userData.isPlanet && obj.userData.defaultPosition) {
+        obj.position.copy(obj.userData.defaultPosition);
+      }
+    });
+
+    // Reset the camera to its default position
+    const defaultCenter = new THREE.Vector3(0, 0, 0);
+    const defaultCameraPos = new THREE.Vector3(0, 0, 10000);
+    controls.enabled = false;
+    gsap.to(camera.position, {
+      x: defaultCameraPos.x,
+      y: defaultCameraPos.y,
+      z: defaultCameraPos.z,
+      duration: 2,
+      ease: 'power2.out',
+      onUpdate: () => camera.lookAt(defaultCenter),
+      onComplete: () => (controls.enabled = true),
+    });
+    gsap.to(controls.target, {
+      x: defaultCenter.x,
+      y: defaultCenter.y,
+      z: defaultCenter.z,
+      duration: 2,
+      ease: 'power2.out',
+    });
+  });
+}
+
 
 /**
  * Animates a planet into view.
@@ -252,6 +324,10 @@ export function comparePlanets(planet1, planet2, scene, camera, controls) {
   });
 }
 
+/**
+ * Continuously updates the rotation of the compared planets.
+ * This function is disabled if Orbit Mode is active.
+ */
 /**
  * Continuously updates the rotation of the compared planets.
  * This function is disabled if Orbit Mode is active.

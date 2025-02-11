@@ -2,16 +2,12 @@
 
 import gsap from "https://cdn.skypack.dev/gsap";
 import * as THREE from "https://cdn.skypack.dev/three@0.129.0/build/three.module.js";
-import { rotationSpeeds, planetTemplates } from "./loadPlanets.js";
+import { rotationSpeeds, planetTemplates, loadPlanetAsync, loader, planetData, loadPlanets } from "./loadPlanets.js";
+
 
 // Define zoom limits for the camera.
-<<<<<<< HEAD
- const MIN_ZOOM = 5000;   // Minimum zoom distance (adjust as needed)
- const MAX_ZOOM = 30000;  // Maximum zoom distance (adjust as needed)
-=======
 const MIN_ZOOM = 5000;   // Minimum zoom distance (adjust as needed)
-const MAX_ZOOM = 20000;  // Maximum zoom distance (adjust as needed)
->>>>>>> 2c77f23 (Fixed default view when in Orbit Mode and Default Mode)
+const MAX_ZOOM = 30000;  // Maximum zoom distance (adjust as needed)
 
 // Object to store the currently compared planet objects.
 const currentComparison = {
@@ -36,25 +32,33 @@ function isOrbitModeActive() {
  * @param {string} name - The planet name.
  * @returns {THREE.Object3D|null} The planet object for comparison, or null if not found.
  */
-function getPlanetInstance(name) {
+// Make getPlanetInstance asynchronous
+async function getPlanetInstance(name, scene) {
   const lowerName = name.toLowerCase();
+  // If Earth, load it again instead of cloning.
+  if (lowerName === "earth") {
+    // Call your loadPlanetAsync with the same parameters used in loadPlanets.js.
+    // Adjust the modelPath and parameters as needed.
+    const modelPath = "https://raw.githubusercontent.com/manueharold/solar-system-threejs/main/3d_models_compressed/earth_draco.glb";
+    return await loadPlanetAsync(loader, scene, "earth", modelPath, [planetData.earth.distance, 0, 0], planetData.earth.scale * planetData.earth.size);
+  }
+  
+  // For Sun and others, use the existing template.
   const template = planetTemplates[lowerName];
   if (!template) {
     console.error(`Template for "${name}" not found.`);
     return null;
   }
-  if (lowerName === "sun", "saturn", "jupiter", "uranus", "neptune") {
-    // Scale it down by 0.05 only once.
+  if (lowerName === "sun") {
     if (!template.userData.comparisonScaled) {
       template.scale.multiplyScalar(0.05);
       template.userData.comparisonScaled = true;
     }
     return template;
   } else {
-    // For other planets, clone the template.
+    // For other planets, clone as before.
     const instance = template.clone(true);
     instance.name = lowerName;
-    // Ensure all child meshes have a name and clone materials for high quality.
     instance.traverse((child) => {
       if (child.isMesh) {
         if (!child.name) child.name = lowerName;
@@ -66,6 +70,7 @@ function getPlanetInstance(name) {
     return instance;
   }
 }
+
 
 /**
  * Helper to animate opacity for all transparent materials of a planet.
@@ -194,7 +199,7 @@ function performComparisonLayout(scene, camera, controls) {
  * @param {THREE.Camera} camera - The camera to adjust.
  * @param {Object} controls - Camera controls to update.
  */
-export function comparePlanets(planet1, planet2, scene, camera, controls) {
+export async function comparePlanets(planet1, planet2, scene, camera, controls) {
   if (isOrbitModeActive()) {
     console.log("Comparison is disabled in Orbit Mode.");
     return;
@@ -228,29 +233,30 @@ export function comparePlanets(planet1, planet2, scene, camera, controls) {
     });
   };
 
-  cleanupOldPlanets().then(() => {
-    // Create or get the planet instances.
-    currentComparison.leftObject = getPlanetInstance(planet1);
-    currentComparison.rightObject = getPlanetInstance(planet2);
-    
-    // If either planet is the Sun, remove any extra Sun from the scene.
-    if (planet1.toLowerCase() === "sun" || planet2.toLowerCase() === "sun") {
-      const sunsToRemove = [];
-      scene.traverse((obj) => {
-        if (obj.name === "sun" &&
-            obj !== currentComparison.leftObject &&
-            obj !== currentComparison.rightObject) {
-          sunsToRemove.push(obj);
-        }
-      });
-      sunsToRemove.forEach((obj) => scene.remove(obj));
-    }
-    
-    // Add the compared objects to the scene.
-    scene.add(currentComparison.leftObject, currentComparison.rightObject);
-    performComparisonLayout(scene, camera, controls);
-  });
+  await cleanupOldPlanets();
+
+  // Get the planet instances asynchronously.
+  currentComparison.leftObject = await getPlanetInstance(planet1, scene);
+  currentComparison.rightObject = await getPlanetInstance(planet2, scene);
+  
+  // Special handling if either is the Sun.
+  if (planet1.toLowerCase() === "sun" || planet2.toLowerCase() === "sun") {
+    const sunsToRemove = [];
+    scene.traverse((obj) => {
+      if (obj.name === "sun" &&
+          obj !== currentComparison.leftObject &&
+          obj !== currentComparison.rightObject) {
+        sunsToRemove.push(obj);
+      }
+    });
+    sunsToRemove.forEach((obj) => scene.remove(obj));
+  }
+  
+  // Add the compared objects to the scene.
+  scene.add(currentComparison.leftObject, currentComparison.rightObject);
+  performComparisonLayout(scene, camera, controls);
 }
+
 
 /**
  * Continuously updates the rotation of the compared planets.

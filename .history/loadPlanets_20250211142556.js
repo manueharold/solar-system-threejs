@@ -22,20 +22,17 @@ export const planetData = {
   moon:    { size: 3474,   distance: 38000,     scale: 0.2 } // Relative to Earth
 };
 
-const simulationEarthRotationSpeed = 2 * Math.PI / 3600; // ~0.001745 radians per frame
-
-// Now define each planet's rotation speed relative to Earth’s rotation period.
-// The denominators below represent the planet's sidereal rotation period in Earth days.
-// (For Venus we use a negative value to simulate its retrograde rotation.)
+// Base rotation speed and per-planet factors
+const baseRotationSpeed = 0.002;
 export const rotationSpeeds = {
-  mercury: simulationEarthRotationSpeed / 58.646,   // Mercury rotates very slowly (≈58.65 Earth days per rotation)
-  venus:   -simulationEarthRotationSpeed / 243,      // Venus rotates retrograde (~243 Earth days per rotation)
-  earth:   simulationEarthRotationSpeed,             // Earth rotates once every 60 seconds in our simulation
-  mars:    simulationEarthRotationSpeed / 1.03,        // Mars rotates roughly every 24.6 hours (~1.03 Earth days)
-  jupiter: simulationEarthRotationSpeed / 0.41,        // Jupiter rotates very fast (~9.9 hours per rotation)
-  saturn:  simulationEarthRotationSpeed / 0.45,        // Saturn rotates in about 10.7 hours
-  uranus:  simulationEarthRotationSpeed / 0.72,        // Uranus rotates in about 17.2 hours
-  neptune: simulationEarthRotationSpeed / 0.67         // Neptune rotates in about 16.1 hours
+  mercury: baseRotationSpeed / 58.6,
+  venus: baseRotationSpeed / 243,
+  earth: baseRotationSpeed / 1,
+  mars: baseRotationSpeed / 1.03,
+  jupiter: baseRotationSpeed / 0.41,
+  saturn: baseRotationSpeed / 0.45,
+  uranus: baseRotationSpeed / 0.72,
+  neptune: baseRotationSpeed / 0.67 
 };
 
 // ===== Global Variables =====
@@ -106,7 +103,7 @@ function createRealisticSun(scene, position, size) {
  * @param {number} size - Desired size (usually calculated as scale * planetData.size).
  * @returns {Promise<THREE.Group>} A promise that resolves with the loaded planet.
  */
-function loadPlanetAsync(loaderInstance, scene, name, modelPath, position, size) {
+export function loadPlanetAsync(loaderInstance, scene, name, modelPath, position, size) {
   return new Promise((resolve, reject) => {
     loaderInstance.load(
       modelPath,
@@ -284,75 +281,138 @@ function animateScene() {
   }
 }
 
+
+/**
+ * Improved collision-avoidance helper.
+ * Iteratively adjusts the target position so that the line from startPos to safeTarget
+ * stays at least a given margin away from any other planet’s bounding sphere.
+ *
+ * @param {THREE.Vector3} startPos - The starting camera position.
+ * @param {THREE.Vector3} targetPos - The initially computed target camera position.
+ * @param {THREE.Scene} scene - The scene containing the planet models.
+ * @param {string} excludeName - The name (in lowercase) of the target planet (to ignore).
+ * @returns {THREE.Vector3} - An adjusted target position.
+ */
+function avoidCollisions(startPos, targetPos, scene, excludeName) {
+  let safeTarget = targetPos.clone();
+  const margin = 50; // Extra clearance; adjust as needed.
+  let collisionFound = true;
+  let iteration = 0;
+  const maxIterations = 10; // Prevent infinite loops.
+
+  while (collisionFound && iteration < maxIterations) {
+    collisionFound = false;
+    const line = new THREE.Line3(startPos, safeTarget);
+
+    // Iterate over all planet objects in the global `planets` object.
+    Object.values(planets).forEach(planet => {
+      if (planet.name.toLowerCase() === excludeName) return;
+
+      // Compute a bounding sphere for the planet.
+      const sphere = new THREE.Sphere();
+      new THREE.Box3().setFromObject(planet).getBoundingSphere(sphere);
+
+      // Find the closest point on the line to the planet's center.
+      const closestPoint = new THREE.Vector3();
+      line.closestPointToPoint(sphere.center, true, closestPoint);
+
+      const distance = sphere.center.distanceTo(closestPoint);
+      if (distance < sphere.radius + margin) {
+        collisionFound = true;
+        const offsetAmount = (sphere.radius + margin) - distance;
+        // Compute a perpendicular direction to offset the target.
+        const direction = new THREE.Vector3().subVectors(safeTarget, startPos);
+        let perp = new THREE.Vector3().crossVectors(direction, new THREE.Vector3(0, 1, 0));
+        if (perp.length() < 0.001) {
+          perp = new THREE.Vector3(1, 0, 0);
+        }
+        perp.normalize();
+        safeTarget.add(perp.multiplyScalar(offsetAmount));
+      }
+    });
+    iteration++;
+  }
+  return safeTarget;
+}
+
 /**
  * Animates the camera to focus on a specified planet.
- * Adjusts OrbitControls limits and triggers UI events accordingly.
+ * The camera moves along a straight-line path (using GSAP), but the target position
+ * is adjusted (via avoidCollisions) so that the camera path avoids passing through
+ * other planets’ models.
+ *
+ * The OrbitControls zoom limits are dynamically updated for a closer view.
  *
  * @param {string} planetName - Name of the target planet.
  * @param {THREE.PerspectiveCamera} camera - The camera to animate.
  * @param {OrbitControls} controls - The OrbitControls instance.
  * @param {THREE.Scene} scene - The scene containing the planet.
  * @param {boolean} isOrbitModeActive - Whether Orbit Mode is active.
- * @returns {Promise} Resolves when the camera animation completes.
+ * @returns {Promise<void>} Resolves when the animation completes.
  */
 export function moveToPlanet(planetName, camera, controls, scene, isOrbitModeActive) {
   return new Promise((resolve, reject) => {
     const nameLower = planetName.toLowerCase();
     const targetPlanet = scene.getObjectByName(nameLower);
     if (!targetPlanet) {
-      console.error(`Planet "${planetName}" not found in scene!`);
-      return reject(new Error(`Planet "${planetName}" not found in scene!`));
+      const errMsg = `❌ Planet "${planetName}" not found in scene!`;
+      console.error(errMsg);
+      return reject(new Error(errMsg));
     }
     console.log(`🚀 Moving to: ${planetName}`);
 
-    // Pause the Moon’s orbit if we're not focusing on Earth (or if in Orbit Mode).
-    // (Assumes moonOrbitPaused is defined elsewhere as a global or imported variable.)
-    moonOrbitPaused = isOrbitModeActive ? true : (nameLower !== "earth");
+    // Pause the Moon’s orbit if not focusing on Earth or if in Orbit Mode.
+    moonOrbitPaused = isOrbitModeActive || nameLower !== "earth";
 
     // Compute the planet's bounding sphere for framing.
     const boundingBox = new THREE.Box3().setFromObject(targetPlanet);
     const boundingSphere = boundingBox.getBoundingSphere(new THREE.Sphere());
-    const targetFocus = boundingSphere.center;
-    const planetRadius = boundingSphere.radius;
+    const { center: targetFocus, radius: planetRadius } = boundingSphere;
 
-    // Calculate the desired camera distance and offset.
-    const defaultZoomMultiplier = 3;
-    const targetDistance = Math.max(planetRadius * defaultZoomMultiplier, 1000);
+    // Adjusted zoom settings: reduced multiplier and minimum distance.
+    const defaultZoomMultiplier = 2; // Reduced from 3 for a closer view.
+    const targetDistance = Math.max(planetRadius * defaultZoomMultiplier, 500); // Minimum distance reduced from 1000 to 500.
     const cameraOffset = planetRadius * 0.5;
 
-    // Update OrbitControls zoom limits.
-    controls.minDistance = targetDistance * 0.5;
-    controls.maxDistance = targetDistance * 2;
-
-    // Compute the target camera position (above and behind the planet).
-    const targetPosition = new THREE.Vector3(
+    // Compute the original target camera position (above and behind the planet).
+    const targetPos = new THREE.Vector3(
       targetFocus.x,
       targetFocus.y + cameraOffset,
       targetFocus.z + targetDistance
     );
 
+    // Dynamically update OrbitControls zoom limits.
+    controls.minDistance = targetDistance * 0.5;
+    controls.maxDistance = targetDistance * 2;
+    console.log(
+      `🔍 Updated zoom limits for ${planetName}: Min ${controls.minDistance}, Max ${controls.maxDistance}`
+    );
+
+    // Adjust target position to avoid collisions with other planets.
+    const startPos = camera.position.clone();
+    const safeTargetPos = avoidCollisions(startPos, targetPos, scene, nameLower);
+
     // Disable controls and hide UI before starting the transition.
     controls.enabled = false;
     hidePlanetInfo();
 
-    // Create a GSAP timeline to run both animations concurrently.
+    // Animate the camera position and the OrbitControls target concurrently.
     const tl = gsap.timeline({
       onComplete: () => {
         controls.enabled = true;
+        showPlanetInfo(planetName);
         resolve();
       }
     });
 
-    // Animate the camera position.
     tl.to(camera.position, {
-      x: targetPosition.x,
-      y: targetPosition.y,
-      z: targetPosition.z,
+      x: safeTargetPos.x,
+      y: safeTargetPos.y,
+      z: safeTargetPos.z,
       duration: 2,
       ease: "power2.out"
     }, 0);
 
-    // Animate the OrbitControls target.
     tl.to(controls.target, {
       x: targetFocus.x,
       y: targetFocus.y,
@@ -360,11 +420,6 @@ export function moveToPlanet(planetName, camera, controls, scene, isOrbitModeAct
       duration: 2,
       ease: "power2.out"
     }, 0);
-
-    // Show the planet info shortly before the animation completes.
-    tl.call(() => {
-      showPlanetInfo(planetName);
-    }, null, 1.8);
   });
 }
 
@@ -386,3 +441,5 @@ export function updatePlanets() {
     planets["moon"].position.z = planets["earth"].position.z + Math.sin(moonOrbitAngle) * moonDistance;
   }
 }
+
+export { loader };

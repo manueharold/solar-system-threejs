@@ -5,13 +5,8 @@ import * as THREE from "https://cdn.skypack.dev/three@0.129.0/build/three.module
 import { rotationSpeeds, planetTemplates } from "./loadPlanets.js";
 
 // Define zoom limits for the camera.
-<<<<<<< HEAD
- const MIN_ZOOM = 5000;   // Minimum zoom distance (adjust as needed)
- const MAX_ZOOM = 30000;  // Maximum zoom distance (adjust as needed)
-=======
-const MIN_ZOOM = 5000;   // Minimum zoom distance (adjust as needed)
-const MAX_ZOOM = 20000;  // Maximum zoom distance (adjust as needed)
->>>>>>> 2c77f23 (Fixed default view when in Orbit Mode and Default Mode)
+const MIN_ZOOM = 2000;   // Minimum zoom distance (adjust as needed)
+const MAX_ZOOM = 15000;  // Maximum zoom distance (adjust as needed)
 
 // Object to store the currently compared planet objects.
 const currentComparison = {
@@ -43,7 +38,8 @@ function getPlanetInstance(name) {
     console.error(`Template for "${name}" not found.`);
     return null;
   }
-  if (lowerName === "sun", "saturn", "jupiter", "uranus", "neptune") {
+  if (lowerName === "sun") {
+    // Do not clone the Sun; use it directly.
     // Scale it down by 0.05 only once.
     if (!template.userData.comparisonScaled) {
       template.scale.multiplyScalar(0.05);
@@ -259,17 +255,16 @@ export function comparePlanets(planet1, planet2, scene, camera, controls) {
 export function updateComparisonRotation() {
   if (isOrbitModeActive()) return;
   
-  if (currentComparison.leftObject && currentComparison.leftObject.name !== "sun") {
+  if (currentComparison.leftObject) {
     const speed = rotationSpeeds[currentComparison.leftObject.name] || 0.002;
     currentComparison.leftObject.rotation.y += speed;
   }
   
-  if (currentComparison.rightObject && currentComparison.rightObject.name !== "sun") {
+  if (currentComparison.rightObject) {
     const speed = rotationSpeeds[currentComparison.rightObject.name] || 0.002;
     currentComparison.rightObject.rotation.y += speed;
   }
 }
-
 
 /**
  * Makes all planet meshes in the scene visible.
