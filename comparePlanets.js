@@ -8,10 +8,7 @@ import { rotationSpeeds, planetTemplates } from "./loadPlanets.js";
 <<<<<<< HEAD
  const MIN_ZOOM = 5000;   // Minimum zoom distance (adjust as needed)
  const MAX_ZOOM = 30000;  // Maximum zoom distance (adjust as needed)
-=======
-const MIN_ZOOM = 5000;   // Minimum zoom distance (adjust as needed)
-const MAX_ZOOM = 20000;  // Maximum zoom distance (adjust as needed)
->>>>>>> 2c77f23 (Fixed default view when in Orbit Mode and Default Mode)
+
 
 // Object to store the currently compared planet objects.
 const currentComparison = {
