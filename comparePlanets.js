@@ -5,8 +5,8 @@ import * as THREE from "https://cdn.skypack.dev/three@0.129.0/build/three.module
 import { rotationSpeeds, planetTemplates, loadPlanetAsync, loader, planetData } from "./loadPlanets.js";
 
 // Define zoom limits for the camera.
-// const MIN_ZOOM = 5000;   // Minimum zoom distance (adjust as needed)
-// const MAX_ZOOM = 30000;  // Maximum zoom distance (adjust as needed)
+ const MIN_ZOOM = 5000;   // Minimum zoom distance (adjust as needed)
+ const MAX_ZOOM = 30000;  // Maximum zoom distance (adjust as needed)
 
 // Object to store the currently compared planet objects.
 const currentComparison = {
