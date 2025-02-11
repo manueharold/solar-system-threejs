@@ -376,13 +376,6 @@ export function moveToPlanet(planetName, camera, controls, scene, isOrbitModeAct
       targetFocus.z + targetDistance
     );
 
-    // Dynamically update OrbitControls zoom limits.
-    controls.minDistance = targetDistance * 0.5;
-    controls.maxDistance = targetDistance * 2;
-    console.log(
-      `🔍 Updated zoom limits for ${planetName}: Min ${controls.minDistance}, Max ${controls.maxDistance}`
-    );
-
     // Adjust target position to avoid collisions with other planets.
     const startPos = camera.position.clone();
     const safeTargetPos = avoidCollisions(startPos, targetPos, scene, nameLower);
@@ -417,6 +410,7 @@ export function moveToPlanet(planetName, camera, controls, scene, isOrbitModeAct
     }, 0);
   });
 }
+
 
 
 

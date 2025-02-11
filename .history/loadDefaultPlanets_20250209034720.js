@@ -9,8 +9,6 @@ export async function loadDefaultPlanets(scene, camera, controls) {
     console.log("Removed orbit mode group.");
   }
 
-  
-
   scene.traverse((child) => {
     if (
       (child.type === "Line" ||

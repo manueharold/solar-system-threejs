@@ -333,10 +333,16 @@ function avoidCollisions(startPos, targetPos, scene, excludeName) {
   return safeTarget;
 }
 
+
+
+
 /**
  * Animates the camera to focus on a specified planet.
- * This version retains your linear movement logic but adjusts the final
- * target position so that the camera path avoids passing too close to other planets.
+ * The camera follows a straight‑line movement (as before), but before starting
+ * the animation, the target position is adjusted (via avoidCollisions) to help ensure
+ * the camera's path doesn't pass too close to other planet models.
+ *
+ * Additionally, the default zoom settings have been changed so that the camera zooms in closer.
  *
  * @param {string} planetName - Name of the target planet.
  * @param {THREE.PerspectiveCamera} camera - The camera to animate.
@@ -364,9 +370,9 @@ export function moveToPlanet(planetName, camera, controls, scene, isOrbitModeAct
     const boundingSphere = boundingBox.getBoundingSphere(new THREE.Sphere());
     const { center: targetFocus, radius: planetRadius } = boundingSphere;
 
-    // Calculate desired camera distance and offset.
-    const defaultZoomMultiplier = 3;
-    const targetDistance = Math.max(planetRadius * defaultZoomMultiplier, 1000);
+    // Adjusted zoom settings: reduced default zoom multiplier and minimum distance.
+    const defaultZoomMultiplier = 2; // reduced from 3 to zoom in closer
+    const targetDistance = Math.max(planetRadius * defaultZoomMultiplier, 500); // minimum distance reduced from 1000 to 500
     const cameraOffset = planetRadius * 0.5;
 
     // Compute the original target camera position (above and behind the planet).
@@ -374,13 +380,6 @@ export function moveToPlanet(planetName, camera, controls, scene, isOrbitModeAct
       targetFocus.x,
       targetFocus.y + cameraOffset,
       targetFocus.z + targetDistance
-    );
-
-    // Dynamically update OrbitControls zoom limits.
-    controls.minDistance = targetDistance * 0.5;
-    controls.maxDistance = targetDistance * 2;
-    console.log(
-      `🔍 Updated zoom limits for ${planetName}: Min ${controls.minDistance}, Max ${controls.maxDistance}`
     );
 
     // Adjust target position to avoid collisions with other planets.
@@ -417,9 +416,6 @@ export function moveToPlanet(planetName, camera, controls, scene, isOrbitModeAct
     }, 0);
   });
 }
-
-
-
 /**
  * A secondary update function for manual planet rotation updates.
  */

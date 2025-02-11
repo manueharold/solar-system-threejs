@@ -283,60 +283,65 @@ function animateScene() {
 
 
 /**
- * Helper function to adjust the target position to avoid collisions.
- * It checks if the straight line from startPos to targetPos comes too close
- * to any planet (except the target) and, if so, offsets the target position.
+ * Improved collision-avoidance helper.
+ * Iteratively adjusts the target position so that the line from startPos to safeTarget
+ * stays at least a given margin away from any other planet’s bounding sphere.
  *
  * @param {THREE.Vector3} startPos - The starting camera position.
- * @param {THREE.Vector3} targetPos - The originally computed target camera position.
+ * @param {THREE.Vector3} targetPos - The initially computed target camera position.
  * @param {THREE.Scene} scene - The scene containing the planet models.
  * @param {string} excludeName - The name (in lowercase) of the target planet (to ignore).
  * @returns {THREE.Vector3} - An adjusted target position.
  */
 function avoidCollisions(startPos, targetPos, scene, excludeName) {
-  const safeTarget = targetPos.clone();
-  const direction = new THREE.Vector3().subVectors(safeTarget, startPos);
-  const line = new THREE.Line3(startPos, safeTarget);
-  const margin = 50; // extra clearance (adjust as needed)
+  let safeTarget = targetPos.clone();
+  const margin = 50; // Extra clearance; adjust as needed.
+  let collisionFound = true;
+  let iteration = 0;
+  const maxIterations = 10; // Prevent infinite loops.
 
-  // Iterate over all planet objects (using the global 'planets' object)
-  Object.values(planets).forEach(planet => {
-    // Skip the target planet
-    if (planet.name.toLowerCase() === excludeName) return;
+  while (collisionFound && iteration < maxIterations) {
+    collisionFound = false;
+    const line = new THREE.Line3(startPos, safeTarget);
 
-    // Compute a bounding sphere for the planet.
-    const sphere = new THREE.Sphere();
-    new THREE.Box3().setFromObject(planet).getBoundingSphere(sphere);
+    // Iterate over all planet objects in the global `planets` object.
+    Object.values(planets).forEach(planet => {
+      if (planet.name.toLowerCase() === excludeName) return;
 
-    // Find the closest point on the line segment to the planet's center.
-    const closestPoint = new THREE.Vector3();
-    line.closestPointToPoint(sphere.center, true, closestPoint);
+      // Compute a bounding sphere for the planet.
+      const sphere = new THREE.Sphere();
+      new THREE.Box3().setFromObject(planet).getBoundingSphere(sphere);
 
-    const distance = sphere.center.distanceTo(closestPoint);
-    if (distance < sphere.radius + margin) {
-      // Calculate how much to offset: the difference plus margin.
-      const offsetAmount = (sphere.radius + margin) - distance;
+      // Find the closest point on the line to the planet's center.
+      const closestPoint = new THREE.Vector3();
+      line.closestPointToPoint(sphere.center, true, closestPoint);
 
-      // Compute a perpendicular direction.
-      let perp = new THREE.Vector3().crossVectors(direction, new THREE.Vector3(0, 1, 0));
-      if (perp.length() < 0.001) {
-        // In case direction is nearly vertical, choose an arbitrary perpendicular vector.
-        perp = new THREE.Vector3(1, 0, 0);
+      const distance = sphere.center.distanceTo(closestPoint);
+      if (distance < sphere.radius + margin) {
+        collisionFound = true;
+        const offsetAmount = (sphere.radius + margin) - distance;
+        // Compute a perpendicular direction to offset the target.
+        const direction = new THREE.Vector3().subVectors(safeTarget, startPos);
+        let perp = new THREE.Vector3().crossVectors(direction, new THREE.Vector3(0, 1, 0));
+        if (perp.length() < 0.001) {
+          perp = new THREE.Vector3(1, 0, 0);
+        }
+        perp.normalize();
+        safeTarget.add(perp.multiplyScalar(offsetAmount));
       }
-      perp.normalize();
-
-      // Offset the target position along this perpendicular direction.
-      safeTarget.add(perp.multiplyScalar(offsetAmount));
-    }
-  });
-
+    });
+    iteration++;
+  }
   return safeTarget;
 }
 
 /**
  * Animates the camera to focus on a specified planet.
- * This version retains your linear movement logic but adjusts the final
- * target position so that the camera path avoids passing too close to other planets.
+ * The camera moves along a straight-line path (using GSAP), but the target position
+ * is adjusted (via avoidCollisions) so that the camera path avoids passing through
+ * other planets’ models.
+ *
+ * The OrbitControls zoom limits are dynamically updated for a closer view.
  *
  * @param {string} planetName - Name of the target planet.
  * @param {THREE.PerspectiveCamera} camera - The camera to animate.
@@ -356,7 +361,7 @@ export function moveToPlanet(planetName, camera, controls, scene, isOrbitModeAct
     }
     console.log(`🚀 Moving to: ${planetName}`);
 
-    // Pause the Moon’s orbit if not focusing on Earth or in Orbit Mode.
+    // Pause the Moon’s orbit if not focusing on Earth or if in Orbit Mode.
     moonOrbitPaused = isOrbitModeActive || nameLower !== "earth";
 
     // Compute the planet's bounding sphere for framing.
@@ -364,9 +369,9 @@ export function moveToPlanet(planetName, camera, controls, scene, isOrbitModeAct
     const boundingSphere = boundingBox.getBoundingSphere(new THREE.Sphere());
     const { center: targetFocus, radius: planetRadius } = boundingSphere;
 
-    // Calculate desired camera distance and offset.
-    const defaultZoomMultiplier = 3;
-    const targetDistance = Math.max(planetRadius * defaultZoomMultiplier, 1000);
+    // Adjusted zoom settings: reduced multiplier and minimum distance.
+    const defaultZoomMultiplier = 2; // Reduced from 3 for a closer view.
+    const targetDistance = Math.max(planetRadius * defaultZoomMultiplier, 500); // Minimum distance reduced from 1000 to 500.
     const cameraOffset = planetRadius * 0.5;
 
     // Compute the original target camera position (above and behind the planet).
@@ -417,7 +422,6 @@ export function moveToPlanet(planetName, camera, controls, scene, isOrbitModeAct
     }, 0);
   });
 }
-
 
 
 /**

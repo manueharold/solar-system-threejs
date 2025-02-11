@@ -335,8 +335,8 @@ function avoidCollisions(startPos, targetPos, scene, excludeName) {
 
 /**
  * Animates the camera to focus on a specified planet.
- * This version retains your linear movement logic but adjusts the final
- * target position so that the camera path avoids passing too close to other planets.
+ * The camera moves along a straight‐line path (with collision avoidance adjustments)
+ * while dynamically updating OrbitControls zoom limits so that the camera is zoomed in closer.
  *
  * @param {string} planetName - Name of the target planet.
  * @param {THREE.PerspectiveCamera} camera - The camera to animate.
@@ -364,9 +364,9 @@ export function moveToPlanet(planetName, camera, controls, scene, isOrbitModeAct
     const boundingSphere = boundingBox.getBoundingSphere(new THREE.Sphere());
     const { center: targetFocus, radius: planetRadius } = boundingSphere;
 
-    // Calculate desired camera distance and offset.
-    const defaultZoomMultiplier = 3;
-    const targetDistance = Math.max(planetRadius * defaultZoomMultiplier, 1000);
+    // Adjusted zoom settings: reduced default zoom multiplier and minimum distance.
+    const defaultZoomMultiplier = 2; // Reduced from 3 to zoom in closer.
+    const targetDistance = Math.max(planetRadius * defaultZoomMultiplier, 500); // Minimum distance reduced from 1000 to 500.
     const cameraOffset = planetRadius * 0.5;
 
     // Compute the original target camera position (above and behind the planet).
@@ -417,8 +417,6 @@ export function moveToPlanet(planetName, camera, controls, scene, isOrbitModeAct
     }, 0);
   });
 }
-
-
 
 /**
  * A secondary update function for manual planet rotation updates.

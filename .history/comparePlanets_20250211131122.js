@@ -5,8 +5,8 @@ import * as THREE from "https://cdn.skypack.dev/three@0.129.0/build/three.module
 import { rotationSpeeds, planetTemplates, loadPlanetAsync, loader, planetData } from "./loadPlanets.js";
 
 // Define zoom limits for the camera.
-// const MIN_ZOOM = 5000;   // Minimum zoom distance (adjust as needed)
-// const MAX_ZOOM = 30000;  // Maximum zoom distance (adjust as needed)
+const MIN_ZOOM = 5000;   // Minimum zoom distance (adjust as needed)
+const MAX_ZOOM = 30000;  // Maximum zoom distance (adjust as needed)
 
 // Object to store the currently compared planet objects.
 const currentComparison = {
@@ -54,55 +54,70 @@ function applyQualitySettings(newObj, originalObj) {
  * If Earth is being compared, load it again (so it gets a fresh instance)
  * and then apply the same quality settings as the original Earth.
  */
-async function getPlanetInstance(name, scene) {
+// Function to get a fresh instance of a planet
+function getPlanetInstance(name) {
   const lowerName = name.toLowerCase();
-  
-  if (lowerName === "earth") {
-    // Re-load Earth from the same model path.
-    const modelPath = "https://raw.githubusercontent.com/manueharold/solar-system-threejs/main/3d_models_compressed/earth_draco.glb";
-    const newEarth = await loadPlanetAsync(
-      loader,
-      scene,
-      "earth",
-      modelPath,
-      [planetData.earth.distance, 0, 0],
-      planetData.earth.scale * planetData.earth.size
-    );
-    // Apply the texture and material settings from the original Earth.
-    const originalEarth = planetTemplates["earth"];
-    if (originalEarth) {
-      applyQualitySettings(newEarth, originalEarth);
-    }
-    return newEarth;
-  }
-  
-  // For Sun and other planets, use the cached template.
   const template = planetTemplates[lowerName];
-  if (!template) {
-    console.error(`Template for "${name}" not found.`);
-    return null;
-  }
-  if (lowerName === "sun") {
-    if (!template.userData.comparisonScaled) {
-      template.scale.multiplyScalar(0.05);
-      template.userData.comparisonScaled = true;
-    }
-    return template;
+  if (!template) return null;
+
+  if (lowerName === "earth") {
+      // Re-load Earth to ensure a fresh instance for comparisons
+      return loadPlanet("earth");
   } else {
-    // For other planets, clone the template.
-    const instance = template.clone(true);
-    instance.name = lowerName;
-    instance.traverse((child) => {
-      if (child.isMesh) {
-        if (!child.name) child.name = lowerName;
-        if (child.material) {
-          child.material = child.material.clone();
-        }
-      }
-    });
-    return instance;
+      // Clone template for other planets
+      const instance = template.clone(true);
+      instance.name = lowerName;
+      instance.traverse((child) => {
+          if (child.isMesh) {
+              if (!child.name) child.name = lowerName;
+              if (child.material) {
+                  child.material = child.material.clone();
+              }
+          }
+      });
+      return instance;
   }
 }
+
+// Apply quality settings to the newly loaded Earth instance
+function applyQualitySettings(originalObj, newObj) {
+  newObj.traverse((child) => {
+      if (child.isMesh) {
+          // Ensure child has a name to match correctly
+          if (!child.name) child.name = "earth";
+          
+          const origChild = originalObj.getObjectByName(child.name);
+          if (origChild && origChild.material) {
+              child.material = origChild.material.clone();
+          }
+      }
+  });
+}
+
+// Load the planet and ensure quality settings are correctly applied
+function loadPlanet(name) {
+  return new Promise((resolve) => {
+      // Simulated loading logic (replace with actual GLTF loading code)
+      const newPlanet = new THREE.Object3D();
+      newPlanet.name = name;
+
+      // Mock child meshes
+      const planetMesh = new THREE.Mesh(new THREE.SphereGeometry(1, 32, 32), new THREE.MeshStandardMaterial());
+      planetMesh.name = name;
+      newPlanet.add(planetMesh);
+
+      resolve(newPlanet);
+  });
+}
+
+// Example usage
+(async () => {
+  const originalEarth = planetTemplates["earth"];
+  const newEarth = await getPlanetInstance("earth");
+  applyQualitySettings(originalEarth, newEarth);
+  console.log("Earth loaded with quality settings applied.", newEarth);
+})();
+
 
 /**
  * Helper to animate opacity for all transparent materials of a planet.

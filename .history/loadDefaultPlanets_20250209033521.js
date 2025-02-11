@@ -5,25 +5,38 @@ export async function loadDefaultPlanets(scene, camera, controls) {
   // ----- Remove Orbit Mode Elements -----
   const orbitModeGroup = scene.getObjectByName("orbitModeGroup");
   if (orbitModeGroup) {
-    scene.remove(orbitModeGroup);
+    if (orbitModeGroup.parent) {
+      orbitModeGroup.parent.remove(orbitModeGroup);
+    } else {
+      scene.remove(orbitModeGroup);
+    }
     console.log("Removed orbit mode group.");
   }
 
-  
-
+  // Remove any orbit lines (for both THREE.Line and THREE.LineSegments) in the scene.
   scene.traverse((child) => {
-    if (
-      (child.type === "Line" ||
-       child.type === "LineSegments" ||
-       child.type === "LineLoop") &&
-      child.name &&
-      child.name.includes("orbit")
-    ) {
-      scene.remove(child);
+    if ((child.isLine || child.isLineSegments) && child.name && child.name.toLowerCase().includes("orbit")) {
+      if (child.parent) {
+        child.parent.remove(child);
+      } else {
+        scene.remove(child);
+      }
       console.log(`Removed orbit line: ${child.name}`);
     }
   });
-  
+
+  // Additionally, if the Sun object exists, remove any orbit line among its children.
+  const sunObj = scene.getObjectByName("sun");
+  if (sunObj) {
+    sunObj.traverse((child) => {
+      if ((child.isLine || child.isLineSegments) && child.name && child.name.toLowerCase().includes("orbit")) {
+        if (child.parent) {
+          child.parent.remove(child);
+        }
+        console.log(`Removed Sun orbit line from Sun: ${child.name}`);
+      }
+    });
+  }
 
   // Remove all existing planet objects to prevent duplicates.
   const planetNames = [
@@ -41,7 +54,11 @@ export async function loadDefaultPlanets(scene, camera, controls) {
   planetNames.forEach((name) => {
     const obj = scene.getObjectByName(name);
     if (obj) {
-      scene.remove(obj);
+      if (obj.parent) {
+        obj.parent.remove(obj);
+      } else {
+        scene.remove(obj);
+      }
       console.log(`Removed ${name} from scene.`);
     }
   });
@@ -68,6 +85,7 @@ export async function loadDefaultPlanets(scene, camera, controls) {
   }
   console.log("Camera instantly set to Earth initial position.");
 
+  // ----- Load Default Planets with Loading UI for Earth -----
   // Show the loading UI before starting to load Earth.
   const loadingContainer = document.getElementById("loadingContainer");
   if (loadingContainer) {
@@ -77,4 +95,30 @@ export async function loadDefaultPlanets(scene, camera, controls) {
   // With the camera already positioned at Earth, loadPlanets will add the planets into the scene.
   await loadPlanets(scene);
   console.log("Default planets reloaded.");
+
+  // Schedule a delayed removal to catch any orbit lines that may be added asynchronously.
+  setTimeout(() => {
+    scene.traverse((child) => {
+      if ((child.isLine || child.isLineSegments) && child.name && child.name.toLowerCase().includes("orbit")) {
+        if (child.parent) {
+          child.parent.remove(child);
+        } else {
+          scene.remove(child);
+        }
+        console.log(`(Delayed) Removed orbit line: ${child.name}`);
+      }
+    });
+    // Also check the Sun's children once more.
+    const newSunObj = scene.getObjectByName("sun");
+    if (newSunObj) {
+      newSunObj.traverse((child) => {
+        if ((child.isLine || child.isLineSegments) && child.name && child.name.toLowerCase().includes("orbit")) {
+          if (child.parent) {
+            child.parent.remove(child);
+          }
+          console.log(`(Delayed) Removed Sun orbit line: ${child.name}`);
+        }
+      });
+    }
+  }, 200);
 }

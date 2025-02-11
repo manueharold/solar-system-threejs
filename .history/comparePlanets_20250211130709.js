@@ -5,8 +5,8 @@ import * as THREE from "https://cdn.skypack.dev/three@0.129.0/build/three.module
 import { rotationSpeeds, planetTemplates, loadPlanetAsync, loader, planetData } from "./loadPlanets.js";
 
 // Define zoom limits for the camera.
-// const MIN_ZOOM = 5000;   // Minimum zoom distance (adjust as needed)
-// const MAX_ZOOM = 30000;  // Maximum zoom distance (adjust as needed)
+const MIN_ZOOM = 5000;   // Minimum zoom distance (adjust as needed)
+const MAX_ZOOM = 30000;  // Maximum zoom distance (adjust as needed)
 
 // Object to store the currently compared planet objects.
 const currentComparison = {
@@ -59,7 +59,7 @@ async function getPlanetInstance(name, scene) {
   
   if (lowerName === "earth") {
     // Re-load Earth from the same model path.
-    const modelPath = "https://raw.githubusercontent.com/manueharold/solar-system-threejs/main/3d_models_compressed/earth_draco.glb";
+    const modelPath = "./3d_models_compressed/earth.glb";
     const newEarth = await loadPlanetAsync(
       loader,
       scene,

@@ -9,21 +9,13 @@ export async function loadDefaultPlanets(scene, camera, controls) {
     console.log("Removed orbit mode group.");
   }
 
-  
-
+  // Remove any orbit lines (assuming they’re THREE.Line objects with "orbit" in the name)
   scene.traverse((child) => {
-    if (
-      (child.type === "Line" ||
-       child.type === "LineSegments" ||
-       child.type === "LineLoop") &&
-      child.name &&
-      child.name.includes("orbit")
-    ) {
+    if (child.type === "Line" && child.name && child.name.includes("orbit")) {
       scene.remove(child);
       console.log(`Removed orbit line: ${child.name}`);
     }
   });
-  
 
   // Remove all existing planet objects to prevent duplicates.
   const planetNames = [
