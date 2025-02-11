@@ -5,7 +5,6 @@ import * as THREE from "https://cdn.skypack.dev/three@0.129.0/build/three.module
 import { rotationSpeeds, planetTemplates } from "./loadPlanets.js";
 
 // Define zoom limits for the camera.
-<<<<<<< HEAD
  const MIN_ZOOM = 5000;   // Minimum zoom distance (adjust as needed)
  const MAX_ZOOM = 30000;  // Maximum zoom distance (adjust as needed)
 
